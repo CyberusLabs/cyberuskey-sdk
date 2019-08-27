@@ -1,0 +1,44 @@
+{
+  "name": "cyberuskey-sdk",
+  "version": "0.0.1",
+  "description": "Cyberus Key SDK",
+  "main": "dist/index.js",
+  "author": "Cyberus Labs",
+  "license": "MIT",
+  "scripts": {
+    "build": "webpack",
+    "build-all": "yarn build && yarn compile",
+    "compile": "tsc",
+    "test": "mocha -r ts-node/register test/**/*.ts"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.0",
+    "@types/mocha": "^5.2.7",
+    "@types/source-map": "^0.5.7",
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0",
+    "terser-webpack-plugin": "^1.4.1",
+    "ts-loader": "^6.0.4",
+    "ts-node": "^8.3.0",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.3",
+    "webpack": "^4.39.2",
+    "webpack-cli": "^3.3.6"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CyberusLabs/cyberuskey-sdk.git"
+  },
+  "keywords": [
+    "cyberuslabs",
+    "cyberuskey",
+    "cyberuskey-sdk"
+  ],
+  "bugs": {
+    "url": "https://github.com/CyberusLabs/cyberuskey-sdk/issues"
+  },
+  "homepage": "https://github.com/CyberusLabs/cyberuskey-sdk#readme"
+}

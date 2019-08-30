@@ -1,6 +1,8 @@
 import { SoundEmitter } from './emitter/soundEmitter';
 import { Navigator } from './navigator/navigator';
 import { OpenIdScopeParser } from './scopeParser';
+import { GeoProvider } from './geoProvider/geoProvider';
+import { Geolocation } from './geoProvider/geo';
 import { Session } from './session';
 /**
  * Cyberus Key API which allows you to do a delegate login with OpenId protocol.
@@ -9,24 +11,26 @@ import { Session } from './session';
  */
 export declare class CyberusKeyAPI {
     private _apiUrl;
+    private _geoProvider;
+    private _cachedGeo;
     /**
      * Creates an instance of CyberusKeyAPI.
      * @param {string} hostUrl Base URL of the host server, e.g. `https://auth-server-demo.cyberuslabs.net`
      * @memberof CyberusKeyAPI
      */
-    constructor(hostUrl: string);
+    constructor(hostUrl: string, geoProvider?: GeoProvider);
     /**
      * Creates the Cyberus Key session.
      *
      * @param {string} clientId Public client ID generated during creating the account.
-     * @param {boolean} [useGeolocation=false] Set `true` if you want to pass optional geolocation measurements.
-     *    They can be later use to compare them against the mobile's measurements (if you have set `fail_on_geo_mismatch`).
+     * @param {Geolocation} [geo] Give a value if you want to pass optional geolocation measurement.
+     *    It can be later use to compare it against the mobile's measurement (if you have set `fail_on_geo_mismatch`).
      *    Those measurements can be used also to general improvement of the security.
      * @throws WrongJsonError, OpenApiError, ResourceNotFoundError, OTPGenerationError, UnknownError
      * @returns {Promise<Session>} The Cyberus Key session.
      * @memberof CyberusKeyAPI
      */
-    createSession(clientId: string, useGeolocation?: boolean): Promise<Session>;
+    createSession(clientId: string, geo?: Geolocation): Promise<Session>;
     /**
      * Gets a sonic sound with embedded OTP.
      *

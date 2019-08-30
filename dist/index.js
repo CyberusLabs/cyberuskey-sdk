@@ -9,6 +9,8 @@ __export(require("./sdk/errors"));
 __export(require("./sdk/navigator/redirectNavigator"));
 __export(require("./sdk/scopeParser"));
 __export(require("./sdk/session"));
+__export(require("./sdk/geoProvider/geo"));
+__export(require("./sdk/geoProvider/html5GeoProvider"));
 const api_1 = require("./sdk/api");
 exports.default = api_1.CyberusKeyAPI;
 //# sourceMappingURL=index.js.map

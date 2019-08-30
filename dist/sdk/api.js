@@ -22,24 +22,29 @@ class CyberusKeyAPI {
      * @param {string} hostUrl Base URL of the host server, e.g. `https://auth-server-demo.cyberuslabs.net`
      * @memberof CyberusKeyAPI
      */
-    constructor(hostUrl) {
+    constructor(hostUrl, geoProvider) {
         this._apiUrl = new URL('/api/v2/', hostUrl);
+        this._geoProvider = geoProvider;
     }
     /**
      * Creates the Cyberus Key session.
      *
      * @param {string} clientId Public client ID generated during creating the account.
-     * @param {boolean} [useGeolocation=false] Set `true` if you want to pass optional geolocation measurements.
-     *    They can be later use to compare them against the mobile's measurements (if you have set `fail_on_geo_mismatch`).
+     * @param {Geolocation} [geo] Give a value if you want to pass optional geolocation measurement.
+     *    It can be later use to compare it against the mobile's measurement (if you have set `fail_on_geo_mismatch`).
      *    Those measurements can be used also to general improvement of the security.
      * @throws WrongJsonError, OpenApiError, ResourceNotFoundError, OTPGenerationError, UnknownError
      * @returns {Promise<Session>} The Cyberus Key session.
      * @memberof CyberusKeyAPI
      */
-    createSession(clientId, useGeolocation = false) {
+    createSession(clientId, geo) {
         return __awaiter(this, void 0, void 0, function* () {
             this._raiseWhenCalledTooManyTimes(createSessionLastTimestamp);
             const data = { client_id: clientId };
+            if (geo) {
+                data['lat'] = geo.latitude;
+                data['lng'] = geo.longitude;
+            }
             const response = yield fetch(this._getUrl('sessions'), {
                 method: 'POST',
                 body: this._getUrlEncodedBody(data),
@@ -142,7 +147,10 @@ class CyberusKeyAPI {
      */
     authenticate(clientId, redirectUri, scope, soundEmitter, navigator, state, nonce) {
         return __awaiter(this, void 0, void 0, function* () {
-            const session = yield this.createSession(clientId);
+            if (this._geoProvider && !this._cachedGeo) {
+                this._cachedGeo = yield this._geoProvider.getGeo();
+            }
+            const session = yield this.createSession(clientId, this._cachedGeo);
             const sound = yield this.getOTPSound(session);
             const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce);
             console.info(`Navigating to ${authenticateUrl}.`);

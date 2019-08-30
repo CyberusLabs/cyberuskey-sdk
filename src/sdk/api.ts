@@ -2,7 +2,10 @@ import { SoundEmitter } from './emitter/soundEmitter';
 import { errorFactory, TooManyCallsError, UnknownError } from './errors';
 import { Navigator } from './navigator/navigator';
 import { OpenIdScopeParser } from './scopeParser';
+import { GeoProvider } from './geoProvider/geoProvider';
+import { Geolocation } from './geoProvider/geo';
 import { Session } from './session';
+
 
 let createSessionLastTimestamp: number | null = null;
 
@@ -13,31 +16,40 @@ let createSessionLastTimestamp: number | null = null;
  */
 export class CyberusKeyAPI {
   private _apiUrl: URL;
+  private _geoProvider: GeoProvider;
+  private _cachedGeo: Geolocation;
 
   /**
    * Creates an instance of CyberusKeyAPI.
    * @param {string} hostUrl Base URL of the host server, e.g. `https://auth-server-demo.cyberuslabs.net`
    * @memberof CyberusKeyAPI
    */
-  constructor(hostUrl: string) {
+  constructor(hostUrl: string, geoProvider?: GeoProvider) {
     this._apiUrl = new URL('/api/v2/', hostUrl);
+    this._geoProvider = geoProvider;
   }
 
   /**
    * Creates the Cyberus Key session.
    *
    * @param {string} clientId Public client ID generated during creating the account.
-   * @param {boolean} [useGeolocation=false] Set `true` if you want to pass optional geolocation measurements.
-   *    They can be later use to compare them against the mobile's measurements (if you have set `fail_on_geo_mismatch`).
+   * @param {Geolocation} [geo] Give a value if you want to pass optional geolocation measurement.
+   *    It can be later use to compare it against the mobile's measurement (if you have set `fail_on_geo_mismatch`).
    *    Those measurements can be used also to general improvement of the security.
    * @throws WrongJsonError, OpenApiError, ResourceNotFoundError, OTPGenerationError, UnknownError
    * @returns {Promise<Session>} The Cyberus Key session.
    * @memberof CyberusKeyAPI
    */
-  public async createSession(clientId: string, useGeolocation: boolean = false): Promise<Session> {
+  public async createSession(clientId: string, geo?: Geolocation): Promise<Session> {
     this._raiseWhenCalledTooManyTimes(createSessionLastTimestamp);
 
     const data = { client_id: clientId };
+
+    if (geo) {
+      data['lat'] = geo.latitude;
+      data['lng'] = geo.longitude;
+    }
+
     const response = await fetch(this._getUrl('sessions'), {
       method: 'POST',
       body: this._getUrlEncodedBody(data),
@@ -149,7 +161,11 @@ export class CyberusKeyAPI {
    * @memberof CyberusKeyAPI
    */
   public async authenticate(clientId: string, redirectUri: string, scope: OpenIdScopeParser, soundEmitter: SoundEmitter, navigator: Navigator, state?: string, nonce?: string) {
-    const session = await this.createSession(clientId);
+    if (this._geoProvider && !this._cachedGeo) {
+      this._cachedGeo = await this._geoProvider.getGeo();
+    }
+
+    const session = await this.createSession(clientId, this._cachedGeo);
     const sound = await this.getOTPSound(session);
 
     const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce);

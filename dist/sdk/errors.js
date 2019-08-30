@@ -19,6 +19,12 @@ class CyberusKeyError extends Error {
         super(message);
         this._code = ErrorCode[code];
     }
+    get code() {
+        return ErrorCode[this._code];
+    }
+    get description() {
+        return this.message;
+    }
 }
 exports.CyberusKeyError = CyberusKeyError;
 class UnknownError extends CyberusKeyError {

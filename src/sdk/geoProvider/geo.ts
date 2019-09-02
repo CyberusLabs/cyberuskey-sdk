@@ -1,3 +1,9 @@
+/**
+ * An abstraction for a taken geolocation measurement.
+ *
+ * @export
+ * @class Geolocation
+ */
 export class Geolocation {
   private _latitude: number;
   private _longitude: number;
@@ -9,14 +15,35 @@ export class Geolocation {
     this._accuracy = accuracy;
   }
 
+  /**
+   * Get a latitude.
+   *
+   * @readonly
+   * @type {number}
+   * @memberof Geolocation
+   */
   get latitude(): number {
     return this._latitude;
   }
 
+  /**
+   * Gets a longitude.
+   *
+   * @readonly
+   * @type {number}
+   * @memberof Geolocation
+   */
   get longitude(): number {
     return this._longitude;
   }
 
+  /**
+   * Gets an accuracy of a measurement.
+   *
+   * @readonly
+   * @type {number}
+   * @memberof Geolocation
+   */
   get accuracy(): number {
     return this._accuracy;
   }

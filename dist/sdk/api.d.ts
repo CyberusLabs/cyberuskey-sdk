@@ -1,8 +1,8 @@
 import { SoundEmitter } from './emitter/soundEmitter';
+import { Geolocation } from './geoProvider/geo';
+import { GeoProvider } from './geoProvider/geoProvider';
 import { Navigator } from './navigator/navigator';
 import { OpenIdScopeParser } from './scopeParser';
-import { GeoProvider } from './geoProvider/geoProvider';
-import { Geolocation } from './geoProvider/geo';
 import { Session } from './session';
 /**
  * Cyberus Key API which allows you to do a delegate login with OpenId protocol.
@@ -13,12 +13,14 @@ export declare class CyberusKeyAPI {
     private _apiUrl;
     private _geoProvider;
     private _cachedGeo;
+    private _delayMs;
     /**
      * Creates an instance of CyberusKeyAPI.
      * @param {string} hostUrl Base URL of the host server, e.g. `https://auth-server-demo.cyberuslabs.net`
+     * @param {number} [delayMs=600] Delay (ms) between making an Authentication request and a sound playing.
      * @memberof CyberusKeyAPI
      */
-    constructor(hostUrl: string, geoProvider?: GeoProvider);
+    constructor(hostUrl: string, geoProvider?: GeoProvider, delayMs?: number);
     /**
      * Creates the Cyberus Key session.
      *
@@ -80,12 +82,32 @@ export declare class CyberusKeyAPI {
      *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
      *    The value is passed through unmodified from the Authentication Request to the ID Token.
      *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+     * @returns {Promise<void>}
      * @memberof CyberusKeyAPI
      */
     authenticate(clientId: string, redirectUri: string, scope: OpenIdScopeParser, soundEmitter: SoundEmitter, navigator: Navigator, state?: string, nonce?: string): Promise<void>;
+    /**
+     * Navigates to Authentication Endpoint and returns a sound. You have to emit it.
+     *
+     * @param {string} clientId Public client ID generated during creating the account.
+     * @param {string} redirectUri Redirect URI to which the response will be sent. If the value is not whitelisted then the request will fail.
+     * @param {OpenIdScopeParser} scope Each scope returns a set of user attributes, which are called claims.
+     *    Once the user authorizes the requested scopes, the claims are returned in an ID Token.
+     * @param {Navigator} navigator Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.
+     * @param {string} [state]
+     *    RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie.
+     *    The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response.
+     *    It’s that unique and non-guessable value that allows you to prevent the attack by confirming if the value coming from the response matches the one you expect (the one you generated when initiating the request).
+     *    The state parameter is a string so you can encode any other information in it.
+     * @param {string} [nonce]
+     *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
+     *    The value is passed through unmodified from the Authentication Request to the ID Token.
+     *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+     * @returns {Promise<void>}
+     * @memberof CyberusKeyAPI
+     */
+    navigateAndGetTheSound(clientId: string, redirectUri: string, scope: OpenIdScopeParser, navigator: Navigator, state?: string, nonce?: string): Promise<ArrayBuffer>;
     private _getUrl;
-    private _timestamp;
-    private _raiseWhenCalledTooManyTimes;
     private _getUrlEncodedBody;
     private _timeout;
 }

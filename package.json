@@ -1,6 +1,6 @@
 {
   "name": "cyberuskey-sdk",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Cyberus Key SDK",
   "main": "dist/index.js",
   "author": "Cyberus Labs",
@@ -8,6 +8,7 @@
   "scripts": {
     "build": "webpack",
     "compile": "tsc",
+    "build:watch": "webpack --watch",
     "test": "mocha -r ts-node/register test/**/*.ts",
     "build:doc": "jsdoc2md --template README.hbs --files ./src/sdk/*.ts --configure ./jsdoc2md.json > ./README.md",
     "build:all": "yarn build && yarn compile && yarn build:doc"

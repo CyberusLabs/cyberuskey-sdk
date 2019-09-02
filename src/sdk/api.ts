@@ -1,13 +1,11 @@
 import { SoundEmitter } from './emitter/soundEmitter';
-import { errorFactory, TooManyCallsError, UnknownError } from './errors';
+import { errorFactory, UnknownError } from './errors';
+import { Geolocation } from './geoProvider/geo';
+import { GeoProvider } from './geoProvider/geoProvider';
 import { Navigator } from './navigator/navigator';
 import { OpenIdScopeParser } from './scopeParser';
-import { GeoProvider } from './geoProvider/geoProvider';
-import { Geolocation } from './geoProvider/geo';
 import { Session } from './session';
 
-
-let createSessionLastTimestamp: number | null = null;
 
 /**
  * Cyberus Key API which allows you to do a delegate login with OpenId protocol.
@@ -18,15 +16,18 @@ export class CyberusKeyAPI {
   private _apiUrl: URL;
   private _geoProvider: GeoProvider;
   private _cachedGeo: Geolocation;
+  private _delayMs: number;
 
   /**
    * Creates an instance of CyberusKeyAPI.
    * @param {string} hostUrl Base URL of the host server, e.g. `https://auth-server-demo.cyberuslabs.net`
+   * @param {number} [delayMs=600] Delay (ms) between making an Authentication request and a sound playing.
    * @memberof CyberusKeyAPI
    */
-  constructor(hostUrl: string, geoProvider?: GeoProvider) {
+  constructor(hostUrl: string, geoProvider?: GeoProvider, delayMs: number = 600) {
     this._apiUrl = new URL('/api/v2/', hostUrl);
     this._geoProvider = geoProvider;
+    this._delayMs = delayMs;
   }
 
   /**
@@ -41,8 +42,6 @@ export class CyberusKeyAPI {
    * @memberof CyberusKeyAPI
    */
   public async createSession(clientId: string, geo?: Geolocation): Promise<Session> {
-    this._raiseWhenCalledTooManyTimes(createSessionLastTimestamp);
-
     const data = { client_id: clientId };
 
     if (geo) {
@@ -58,8 +57,6 @@ export class CyberusKeyAPI {
       }
     });
     const json = await response.json();
-
-    createSessionLastTimestamp = this._timestamp();
 
     if (response.ok && response.status === 201 && json.success) {
       return new Session(json.data);
@@ -158,9 +155,10 @@ export class CyberusKeyAPI {
    *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
    *    The value is passed through unmodified from the Authentication Request to the ID Token.
    *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+   * @returns {Promise<void>}
    * @memberof CyberusKeyAPI
    */
-  public async authenticate(clientId: string, redirectUri: string, scope: OpenIdScopeParser, soundEmitter: SoundEmitter, navigator: Navigator, state?: string, nonce?: string) {
+  public async authenticate(clientId: string, redirectUri: string, scope: OpenIdScopeParser, soundEmitter: SoundEmitter, navigator: Navigator, state?: string, nonce?: string): Promise<void> {
     if (this._geoProvider && !this._cachedGeo) {
       this._cachedGeo = await this._geoProvider.getGeo();
     }
@@ -181,22 +179,47 @@ export class CyberusKeyAPI {
     await soundEmitter.emit(sound);
   }
 
+  /**
+   * Navigates to Authentication Endpoint and returns a sound. You have to emit it.
+   *
+   * @param {string} clientId Public client ID generated during creating the account.
+   * @param {string} redirectUri Redirect URI to which the response will be sent. If the value is not whitelisted then the request will fail.
+   * @param {OpenIdScopeParser} scope Each scope returns a set of user attributes, which are called claims.
+   *    Once the user authorizes the requested scopes, the claims are returned in an ID Token.
+   * @param {Navigator} navigator Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.
+   * @param {string} [state]
+   *    RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie.
+   *    The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response.
+   *    It’s that unique and non-guessable value that allows you to prevent the attack by confirming if the value coming from the response matches the one you expect (the one you generated when initiating the request).
+   *    The state parameter is a string so you can encode any other information in it.
+   * @param {string} [nonce]
+   *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
+   *    The value is passed through unmodified from the Authentication Request to the ID Token.
+   *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+   * @returns {Promise<void>}
+   * @memberof CyberusKeyAPI
+   */
+  public async navigateAndGetTheSound(clientId: string, redirectUri: string, scope: OpenIdScopeParser, navigator: Navigator, state?: string, nonce?: string): Promise<ArrayBuffer> {
+    if (this._geoProvider && !this._cachedGeo) {
+      this._cachedGeo = await this._geoProvider.getGeo();
+    }
+
+    const session = await this.createSession(clientId, this._cachedGeo);
+    const sound = await this.getOTPSound(session);
+
+    const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce);
+
+    console.info(`Navigating to ${authenticateUrl}.`);
+
+    await navigator.navigate(authenticateUrl);
+
+    await this._timeout(this._delayMs);
+
+    return sound;
+  }
+
   private _getUrl(path: string): string {
     return (new URL(path, this._apiUrl)).href;
-  }
-
-  private _timestamp(): number {
-    return (new Date()).getTime();
-  }
-
-  private _raiseWhenCalledTooManyTimes(lastTimestamp: number | null) {
-    if (!lastTimestamp) {
-      return;
-    }
-
-    if (this._timestamp() - lastTimestamp < 1000 * 10) {
-      throw new TooManyCallsError();
-    }
   }
 
   private _getUrlEncodedBody(data: any): string {

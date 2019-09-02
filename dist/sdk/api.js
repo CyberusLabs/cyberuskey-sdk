@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const errors_1 = require("./errors");
 const session_1 = require("./session");
-let createSessionLastTimestamp = null;
 /**
  * Cyberus Key API which allows you to do a delegate login with OpenId protocol.
  *
@@ -20,11 +19,13 @@ class CyberusKeyAPI {
     /**
      * Creates an instance of CyberusKeyAPI.
      * @param {string} hostUrl Base URL of the host server, e.g. `https://auth-server-demo.cyberuslabs.net`
+     * @param {number} [delayMs=600] Delay (ms) between making an Authentication request and a sound playing.
      * @memberof CyberusKeyAPI
      */
-    constructor(hostUrl, geoProvider) {
+    constructor(hostUrl, geoProvider, delayMs = 600) {
         this._apiUrl = new URL('/api/v2/', hostUrl);
         this._geoProvider = geoProvider;
+        this._delayMs = delayMs;
     }
     /**
      * Creates the Cyberus Key session.
@@ -39,7 +40,6 @@ class CyberusKeyAPI {
      */
     createSession(clientId, geo) {
         return __awaiter(this, void 0, void 0, function* () {
-            this._raiseWhenCalledTooManyTimes(createSessionLastTimestamp);
             const data = { client_id: clientId };
             if (geo) {
                 data['lat'] = geo.latitude;
@@ -53,7 +53,6 @@ class CyberusKeyAPI {
                 }
             });
             const json = yield response.json();
-            createSessionLastTimestamp = this._timestamp();
             if (response.ok && response.status === 201 && json.success) {
                 return new session_1.Session(json.data);
             }
@@ -143,6 +142,7 @@ class CyberusKeyAPI {
      *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
      *    The value is passed through unmodified from the Authentication Request to the ID Token.
      *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+     * @returns {Promise<void>}
      * @memberof CyberusKeyAPI
      */
     authenticate(clientId, redirectUri, scope, soundEmitter, navigator, state, nonce) {
@@ -160,19 +160,42 @@ class CyberusKeyAPI {
             yield soundEmitter.emit(sound);
         });
     }
+    /**
+     * Navigates to Authentication Endpoint and returns a sound. You have to emit it.
+     *
+     * @param {string} clientId Public client ID generated during creating the account.
+     * @param {string} redirectUri Redirect URI to which the response will be sent. If the value is not whitelisted then the request will fail.
+     * @param {OpenIdScopeParser} scope Each scope returns a set of user attributes, which are called claims.
+     *    Once the user authorizes the requested scopes, the claims are returned in an ID Token.
+     * @param {Navigator} navigator Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.
+     * @param {string} [state]
+     *    RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie.
+     *    The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response.
+     *    It’s that unique and non-guessable value that allows you to prevent the attack by confirming if the value coming from the response matches the one you expect (the one you generated when initiating the request).
+     *    The state parameter is a string so you can encode any other information in it.
+     * @param {string} [nonce]
+     *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
+     *    The value is passed through unmodified from the Authentication Request to the ID Token.
+     *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+     * @returns {Promise<void>}
+     * @memberof CyberusKeyAPI
+     */
+    navigateAndGetTheSound(clientId, redirectUri, scope, navigator, state, nonce) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this._geoProvider && !this._cachedGeo) {
+                this._cachedGeo = yield this._geoProvider.getGeo();
+            }
+            const session = yield this.createSession(clientId, this._cachedGeo);
+            const sound = yield this.getOTPSound(session);
+            const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce);
+            console.info(`Navigating to ${authenticateUrl}.`);
+            yield navigator.navigate(authenticateUrl);
+            yield this._timeout(this._delayMs);
+            return sound;
+        });
+    }
     _getUrl(path) {
         return (new URL(path, this._apiUrl)).href;
-    }
-    _timestamp() {
-        return (new Date()).getTime();
-    }
-    _raiseWhenCalledTooManyTimes(lastTimestamp) {
-        if (!lastTimestamp) {
-            return;
-        }
-        if (this._timestamp() - lastTimestamp < 1000 * 10) {
-            throw new errors_1.TooManyCallsError();
-        }
     }
     _getUrlEncodedBody(data) {
         return Object.keys(data).reduce((result, key) => {

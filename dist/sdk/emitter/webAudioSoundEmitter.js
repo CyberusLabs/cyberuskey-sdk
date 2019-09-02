@@ -8,7 +8,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Class uses a HTML5's AudioContext interface to play a sound.
+ *
+ * @export
+ * @class WebAudioSoundEmitter
+ * @implements {SoundEmitter}
+ */
 class WebAudioSoundEmitter {
+    /**
+     * Emits a sound through HTML5's AudioContext interface.
+     *
+     * @param {ArrayBuffer} sound A binary record of the sound you want to play.
+     * @returns {Promise<void>}
+     * @memberof WebAudioSoundEmitter
+     */
     emit(sound) {
         return __awaiter(this, void 0, void 0, function* () {
             let context;

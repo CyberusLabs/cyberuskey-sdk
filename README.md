@@ -22,6 +22,8 @@ TODO
 <dl>
 <dt><a href="#CyberusKeyAPI">CyberusKeyAPI</a></dt>
 <dd></dd>
+<dt><a href="#OpenIdScopeParser">OpenIdScopeParser</a></dt>
+<dd></dd>
 <dt><a href="#Session">Session</a></dt>
 <dd></dd>
 </dl>
@@ -37,10 +39,11 @@ TODO
         * [.createSession(clientId, [geo])](#CyberusKeyAPI+createSession) ⇒ [<code>Promise.&lt;Session&gt;</code>](#Session)
         * [.getOTPSound(session)](#CyberusKeyAPI+getOTPSound) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
         * [.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, [state], [nonce])](#CyberusKeyAPI+getAuthenticationEndpointUrl) ⇒
-        * [.authenticate(clientId, redirectUri, scope, soundEmitter, navigator, [state], [nonce])](#CyberusKeyAPI+authenticate)
+        * [.authenticate(clientId, redirectUri, scope, soundEmitter, navigator, [state], [nonce])](#CyberusKeyAPI+authenticate) ⇒ <code>Promise.&lt;void&gt;</code>
+        * [.navigateAndGetTheSound(clientId, redirectUri, scope, navigator, [state], [nonce])](#CyberusKeyAPI+navigateAndGetTheSound) ⇒ <code>Promise.&lt;void&gt;</code>
     * _static_
         * [.CyberusKeyAPI](#CyberusKeyAPI.CyberusKeyAPI)
-            * [new CyberusKeyAPI(hostUrl)](#new_CyberusKeyAPI.CyberusKeyAPI_new)
+            * [new CyberusKeyAPI(hostUrl, [delayMs])](#new_CyberusKeyAPI.CyberusKeyAPI_new)
 
 <a name="new_CyberusKeyAPI_new"></a>
 
@@ -95,7 +98,7 @@ TODO
 | Param | Type | Description |
 | --- | --- | --- |
 | session | [<code>Session</code>](#Session) | <p>Cyberus Key session.</p> |
-| scope | <code>OpenIdScopeParser</code> | <p>Each scope returns a set of user attributes, which are called claims. Once the user authorizes the requested scopes, the claims are returned in an ID Token.</p> |
+| scope | [<code>OpenIdScopeParser</code>](#OpenIdScopeParser) | <p>Each scope returns a set of user attributes, which are called claims. Once the user authorizes the requested scopes, the claims are returned in an ID Token.</p> |
 | clientId | <code>string</code> | <p>Public client ID generated during creating the account.</p> |
 | redirectUri | <code>string</code> | <p>Redirect URI to which the response will be sent. If the value is not whitelisted then the request will fail.</p> |
 | [state] | <code>string</code> | <p>RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie. The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response. It’s that unique and non-guessable value that allows you to prevent the attack by confirming if the value coming from the response matches the one you expect (the one you generated when initiating the request). The state parameter is a string so you can encode any other information in it.</p> |
@@ -103,7 +106,7 @@ TODO
 
 <a name="CyberusKeyAPI+authenticate"></a>
 
-### cyberusKeyAPI.authenticate(clientId, redirectUri, scope, soundEmitter, navigator, [state], [nonce])
+### cyberusKeyAPI.authenticate(clientId, redirectUri, scope, soundEmitter, navigator, [state], [nonce]) ⇒ <code>Promise.&lt;void&gt;</code>
 <p>Makes an authentication with Cyberus Key.</p>
 
 **Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
@@ -112,8 +115,24 @@ TODO
 | --- | --- | --- |
 | clientId | <code>string</code> | <p>Public client ID generated during creating the account.</p> |
 | redirectUri | <code>string</code> | <p>Redirect URI to which the response will be sent. If the value is not whitelisted then the request will fail.</p> |
-| scope | <code>OpenIdScopeParser</code> | <p>Each scope returns a set of user attributes, which are called claims. Once the user authorizes the requested scopes, the claims are returned in an ID Token.</p> |
+| scope | [<code>OpenIdScopeParser</code>](#OpenIdScopeParser) | <p>Each scope returns a set of user attributes, which are called claims. Once the user authorizes the requested scopes, the claims are returned in an ID Token.</p> |
 | soundEmitter | <code>SoundEmitter</code> | <p>Interface which can play a sound.</p> |
+| navigator | <code>Navigator</code> | <p>Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.</p> |
+| [state] | <code>string</code> | <p>RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie. The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response. It’s that unique and non-guessable value that allows you to prevent the attack by confirming if the value coming from the response matches the one you expect (the one you generated when initiating the request). The state parameter is a string so you can encode any other information in it.</p> |
+| [nonce] | <code>string</code> | <p>String value used to associate a Client session with an ID Token, and to mitigate replay attacks. The value is passed through unmodified from the Authentication Request to the ID Token. Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.</p> |
+
+<a name="CyberusKeyAPI+navigateAndGetTheSound"></a>
+
+### cyberusKeyAPI.navigateAndGetTheSound(clientId, redirectUri, scope, navigator, [state], [nonce]) ⇒ <code>Promise.&lt;void&gt;</code>
+<p>Navigates to Authentication Endpoint and returns a sound. You have to emit it.</p>
+
+**Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| clientId | <code>string</code> | <p>Public client ID generated during creating the account.</p> |
+| redirectUri | <code>string</code> | <p>Redirect URI to which the response will be sent. If the value is not whitelisted then the request will fail.</p> |
+| scope | [<code>OpenIdScopeParser</code>](#OpenIdScopeParser) | <p>Each scope returns a set of user attributes, which are called claims. Once the user authorizes the requested scopes, the claims are returned in an ID Token.</p> |
 | navigator | <code>Navigator</code> | <p>Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.</p> |
 | [state] | <code>string</code> | <p>RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie. The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response. It’s that unique and non-guessable value that allows you to prevent the attack by confirming if the value coming from the response matches the one you expect (the one you generated when initiating the request). The state parameter is a string so you can encode any other information in it.</p> |
 | [nonce] | <code>string</code> | <p>String value used to associate a Client session with an ID Token, and to mitigate replay attacks. The value is passed through unmodified from the Authentication Request to the ID Token. Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.</p> |
@@ -124,14 +143,55 @@ TODO
 **Kind**: static class of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
 <a name="new_CyberusKeyAPI.CyberusKeyAPI_new"></a>
 
-#### new CyberusKeyAPI(hostUrl)
+#### new CyberusKeyAPI(hostUrl, [delayMs])
 <p>Creates an instance of CyberusKeyAPI.</p>
 
 
-| Param | Type | Description |
-| --- | --- | --- |
-| hostUrl | <code>string</code> | <p>Base URL of the host server, e.g. <code>https://auth-server-demo.cyberuslabs.net</code></p> |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| hostUrl | <code>string</code> |  | <p>Base URL of the host server, e.g. <code>https://auth-server-demo.cyberuslabs.net</code></p> |
+| [delayMs] | <code>number</code> | <code>600</code> | <p>Delay (ms) between making an Authentication request and a sound playing.</p> |
 
+<a name="OpenIdScopeParser"></a>
+
+## OpenIdScopeParser
+**Kind**: global class  
+
+* [OpenIdScopeParser](#OpenIdScopeParser)
+    * [new OpenIdScopeParser()](#new_OpenIdScopeParser_new)
+    * [.addEmail()](#OpenIdScopeParser+addEmail) ⇒ <code>this</code>
+    * [.addProfile()](#OpenIdScopeParser+addProfile) ⇒ <code>this</code>
+    * [.getValue()](#OpenIdScopeParser+getValue) ⇒ <code>string</code>
+
+<a name="new_OpenIdScopeParser_new"></a>
+
+### new OpenIdScopeParser()
+<p>Handy class to define an OpenID's scope.
+Scopes are used by an application during authentication to authorize access to a user's details,
+like name and picture. Each scope returns a set of user attributes, which are called claims.</p>
+<p>You can use additional values <code>email</code> (add a user's email claim) and <code>profile</code> (add user first and last name).</p>
+<pre class="prettyprint source lang-javascript"><code>const scopeParser = new OpenIdScopeParser();
+const scope = scopeParser.addEmail().addProfile().getValue();
+</code></pre>
+
+<a name="OpenIdScopeParser+addEmail"></a>
+
+### openIdScopeParser.addEmail() ⇒ <code>this</code>
+<p>Adds <code>email</code> scope.</p>
+
+**Kind**: instance method of [<code>OpenIdScopeParser</code>](#OpenIdScopeParser)  
+<a name="OpenIdScopeParser+addProfile"></a>
+
+### openIdScopeParser.addProfile() ⇒ <code>this</code>
+<p>Adds <code>profile</code> scope.</p>
+
+**Kind**: instance method of [<code>OpenIdScopeParser</code>](#OpenIdScopeParser)  
+<a name="OpenIdScopeParser+getValue"></a>
+
+### openIdScopeParser.getValue() ⇒ <code>string</code>
+<p>Gets formatted scope value, e.g. <code>openid email</code>.</p>
+
+**Kind**: instance method of [<code>OpenIdScopeParser</code>](#OpenIdScopeParser)  
 <a name="Session"></a>
 
 ## Session

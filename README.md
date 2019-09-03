@@ -13,7 +13,15 @@ protocol.
 
 # How to install
 
-TODO
+With NPM:
+```
+npm install cyberuskey-sdk
+```
+
+With Yarn:
+```
+yarn add cyberuskey-sdk
+```
 
 # Documentation
 
@@ -216,3 +224,11 @@ const scope = scopeParser.addEmail().addProfile().getValue();
 #### new Session()
 <p>A UTC date representing a date (and time) when a session has been created.</p>
 
+
+# Links
+
+CyberusKey JavaScript widget: https://github.com/CyberusLabs/cyberuskey-widget/
+
+# License
+
+[MIT](LICENSE.md) © Cyberus Labs sp. z o.o.

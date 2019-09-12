@@ -1,3 +1,7 @@
+<p>
+  <img src="https://cyberuslabs.com/wp-content/uploads/2015/09/cl_new_logo-e1553199321586.png" alt="Cyberus Key logo">
+</p>
+
 # What is Cyberus Key?
 
 Your users will never need to remember or input a password again with Cyberus Key, our one-touch
@@ -23,6 +27,15 @@ With Yarn:
 yarn add cyberuskey-sdk
 ```
 
+You can also get a minified file from JSDelivr's CDN:
+```
+<script src="https://cdn.jsdelivr.net/npm/cyberuskey-sdk@0.0.4/dist/sdk.es6.min.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+  console.log(window['cyberuskey-sdk']);
+</script>
+```
+
 # Documentation
 
 ## Classes
@@ -33,6 +46,14 @@ yarn add cyberuskey-sdk
 <dt><a href="#OpenIdScopeParser">OpenIdScopeParser</a></dt>
 <dd></dd>
 <dt><a href="#Session">Session</a></dt>
+<dd></dd>
+<dt><a href="#WebAudioSoundEmitter">WebAudioSoundEmitter</a></dt>
+<dd></dd>
+<dt><a href="#Geolocation">Geolocation</a></dt>
+<dd></dd>
+<dt><a href="#HTML5GeoProvider">HTML5GeoProvider</a></dt>
+<dd></dd>
+<dt><a href="#RedirectNavigator">RedirectNavigator</a></dt>
 <dd></dd>
 </dl>
 
@@ -51,7 +72,7 @@ yarn add cyberuskey-sdk
         * [.navigateAndGetTheSound(clientId, redirectUri, scope, navigator, [state], [nonce])](#CyberusKeyAPI+navigateAndGetTheSound) ⇒ <code>Promise.&lt;void&gt;</code>
     * _static_
         * [.CyberusKeyAPI](#CyberusKeyAPI.CyberusKeyAPI)
-            * [new CyberusKeyAPI(hostUrl, [delayMs])](#new_CyberusKeyAPI.CyberusKeyAPI_new)
+            * [new CyberusKeyAPI(hostUrl, [geoProvider], [delayMs])](#new_CyberusKeyAPI.CyberusKeyAPI_new)
 
 <a name="new_CyberusKeyAPI_new"></a>
 
@@ -73,7 +94,7 @@ yarn add cyberuskey-sdk
 | Param | Type | Description |
 | --- | --- | --- |
 | clientId | <code>string</code> | <p>Public client ID generated during creating the account.</p> |
-| [geo] | <code>Geolocation</code> | <p>Give a value if you want to pass optional geolocation measurement. It can be later use to compare it against the mobile's measurement (if you have set <code>fail_on_geo_mismatch</code>). Those measurements can be used also to general improvement of the security.</p> |
+| [geo] | [<code>Geolocation</code>](#Geolocation) | <p>Give a value if you want to pass optional geolocation measurement. It can be later use to compare it against the mobile's measurement (if you have set <code>fail_on_geo_mismatch</code>). Those measurements can be used also to general improvement of the security.</p> |
 
 <a name="CyberusKeyAPI+getOTPSound"></a>
 
@@ -151,13 +172,14 @@ yarn add cyberuskey-sdk
 **Kind**: static class of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
 <a name="new_CyberusKeyAPI.CyberusKeyAPI_new"></a>
 
-#### new CyberusKeyAPI(hostUrl, [delayMs])
+#### new CyberusKeyAPI(hostUrl, [geoProvider], [delayMs])
 <p>Creates an instance of CyberusKeyAPI.</p>
 
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | hostUrl | <code>string</code> |  | <p>Base URL of the host server, e.g. <code>https://auth-server-demo.cyberuslabs.net</code></p> |
+| [geoProvider] | <code>GeoProvider</code> |  | <p>Geolocalization provider. Use specific implementation like <code>HTML5GeoProvider</code>.</p> |
 | [delayMs] | <code>number</code> | <code>600</code> | <p>Delay (ms) between making an Authentication request and a sound playing.</p> |
 
 <a name="OpenIdScopeParser"></a>
@@ -223,6 +245,125 @@ const scope = scopeParser.addEmail().addProfile().getValue();
 
 #### new Session()
 <p>A UTC date representing a date (and time) when a session has been created.</p>
+
+<a name="WebAudioSoundEmitter"></a>
+
+## WebAudioSoundEmitter
+**Kind**: global class  
+**Implements**: <code>SoundEmitter</code>  
+
+* [WebAudioSoundEmitter](#WebAudioSoundEmitter)
+    * [new WebAudioSoundEmitter()](#new_WebAudioSoundEmitter_new)
+    * [.emit(sound)](#WebAudioSoundEmitter+emit) ⇒ <code>Promise.&lt;void&gt;</code>
+
+<a name="new_WebAudioSoundEmitter_new"></a>
+
+### new WebAudioSoundEmitter()
+<p>Class uses a HTML5's AudioContext interface to play a sound.</p>
+
+<a name="WebAudioSoundEmitter+emit"></a>
+
+### webAudioSoundEmitter.emit(sound) ⇒ <code>Promise.&lt;void&gt;</code>
+<p>Emits a sound through HTML5's AudioContext interface.</p>
+
+**Kind**: instance method of [<code>WebAudioSoundEmitter</code>](#WebAudioSoundEmitter)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| sound | <code>ArrayBuffer</code> | <p>A binary record of the sound you want to play.</p> |
+
+<a name="Geolocation"></a>
+
+## Geolocation
+**Kind**: global class  
+
+* [Geolocation](#Geolocation)
+    * [new Geolocation()](#new_Geolocation_new)
+    * [.latitude](#Geolocation+latitude) : <code>number</code>
+    * [.longitude](#Geolocation+longitude) : <code>number</code>
+    * [.accuracy](#Geolocation+accuracy) : <code>number</code>
+
+<a name="new_Geolocation_new"></a>
+
+### new Geolocation()
+<p>An abstraction for a taken geolocation measurement.</p>
+
+<a name="Geolocation+latitude"></a>
+
+### geolocation.latitude : <code>number</code>
+<p>Get a latitude.</p>
+
+**Kind**: instance property of [<code>Geolocation</code>](#Geolocation)  
+**Read only**: true  
+<a name="Geolocation+longitude"></a>
+
+### geolocation.longitude : <code>number</code>
+<p>Gets a longitude.</p>
+
+**Kind**: instance property of [<code>Geolocation</code>](#Geolocation)  
+**Read only**: true  
+<a name="Geolocation+accuracy"></a>
+
+### geolocation.accuracy : <code>number</code>
+<p>Gets an accuracy of a measurement.</p>
+
+**Kind**: instance property of [<code>Geolocation</code>](#Geolocation)  
+**Read only**: true  
+<a name="HTML5GeoProvider"></a>
+
+## HTML5GeoProvider
+**Kind**: global class  
+**Implements**: <code>GeoProvider</code>  
+
+* [HTML5GeoProvider](#HTML5GeoProvider)
+    * [new HTML5GeoProvider()](#new_HTML5GeoProvider_new)
+    * [.getGeo()](#HTML5GeoProvider+getGeo) ⇒ [<code>Promise.&lt;Geolocation&gt;</code>](#Geolocation)
+
+<a name="new_HTML5GeoProvider_new"></a>
+
+### new HTML5GeoProvider()
+<p>Class provides a geolocalization measurement.
+It uses a HTML5's <code>Geolocation.getCurrentPosition()</code> method.</p>
+
+<a name="HTML5GeoProvider+getGeo"></a>
+
+### htmL5GeoProvider.getGeo() ⇒ [<code>Promise.&lt;Geolocation&gt;</code>](#Geolocation)
+<p>Gets a geolocalization measurement.</p>
+
+**Kind**: instance method of [<code>HTML5GeoProvider</code>](#HTML5GeoProvider)  
+**Returns**: [<code>Promise.&lt;Geolocation&gt;</code>](#Geolocation) - <p>Geolocalization measurement.</p>  
+<a name="RedirectNavigator"></a>
+
+## RedirectNavigator
+**Kind**: global class  
+**Implements**: <code>Navigator</code>  
+
+* [RedirectNavigator](#RedirectNavigator)
+    * [new RedirectNavigator()](#new_RedirectNavigator_new)
+    * [.navigate(url)](#RedirectNavigator+navigate) ⇒ <code>Promise.&lt;void&gt;</code>
+
+<a name="new_RedirectNavigator_new"></a>
+
+### new RedirectNavigator()
+<p>Class describes how OpenID's Authentication Endpoint will be handled.
+This class is thighten to a default browser behaviour for OpenID protocol - a redirection.
+Which means that your URL will be temporarily replaced by the Authentication Endpoint
+and replaced again by its response - HTTP 302. The new location will be the one you defined as your <code>redirect_uri</code>.</p>
+
+<a name="RedirectNavigator+navigate"></a>
+
+### redirectNavigator.navigate(url) ⇒ <code>Promise.&lt;void&gt;</code>
+<p>Navigates to the given URL.</p>
+
+**Kind**: instance method of [<code>RedirectNavigator</code>](#RedirectNavigator)  
+**Throws**:
+
+- <p>MissingRedirectUri</p>
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | <p>Authentication Endpoint URL.</p> |
 
 
 # Links

@@ -9,6 +9,8 @@ import { GeoProvider } from './geoProvider';
  * @implements {GeoProvider}
  */
 export declare class HTML5GeoProvider implements GeoProvider {
+    private _navigator;
+    constructor(navigator?: Navigator);
     /**
      * Gets a geolocalization measurement.
      *

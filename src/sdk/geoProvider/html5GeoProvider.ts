@@ -11,6 +11,12 @@ import { GeoProvider } from './geoProvider';
  * @implements {GeoProvider}
  */
 export class HTML5GeoProvider implements GeoProvider {
+  private _navigator: Navigator;
+
+  constructor(navigator: Navigator = window.navigator) {
+    this._navigator = navigator;
+  }
+
   /**
    * Gets a geolocalization measurement.
    *
@@ -18,14 +24,23 @@ export class HTML5GeoProvider implements GeoProvider {
    * @memberof HTML5GeoProvider
    */
   async getGeo(): Promise<Geolocation> {
-    const { coords } = await this._getGeo();
+    let result = null;
+
+    try {
+      result = await this._getGeo();
+    } catch {
+      // E.g. user didn't agree on geolicalization.
+      return null;
+    }
+
+    const { coords } = result;
 
     return new Geolocation(coords.latitude, coords.longitude, coords.accuracy);
   }
 
   _getGeo(): Promise<Position> {
     return new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true })
+      this._navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true })
     });
   }
 }

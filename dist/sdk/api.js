@@ -101,17 +101,18 @@ class CyberusKeyAPI {
      *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
      *    The value is passed through unmodified from the Authentication Request to the ID Token.
      *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+     * @param {string} [responseType='code'] OpenId response type. The default is `code` (Code Flow, involving the front-channel and backchannel).
      * @returns OpenID's Authentication endpoint URL
      * @throws InvalidRedirectUriError, InvalidClientError, ResourceNotFoundError
      * @memberof CyberusKeyAPI
      */
-    getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce) {
+    getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce, responseType = 'code') {
         const data = {
             session_id: session.sessionId,
             client_id: clientId,
             scope: scope.getValue(),
             redirect_uri: redirectUri,
-            response_type: 'code'
+            response_type: responseType
         };
         if (state) {
             data['state'] = state;
@@ -143,17 +144,18 @@ class CyberusKeyAPI {
      *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
      *    The value is passed through unmodified from the Authentication Request to the ID Token.
      *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+     * @param {string} [responseType='code'] OpenId response type. The default is `code` (Code Flow, involving the front-channel and backchannel).
      * @returns {Promise<void>}
      * @memberof CyberusKeyAPI
      */
-    authenticate(clientId, redirectUri, scope, soundEmitter, navigator, state, nonce) {
+    authenticate(clientId, redirectUri, scope, soundEmitter, navigator, state, nonce, responseType = 'code') {
         return __awaiter(this, void 0, void 0, function* () {
             if (this._geoProvider && !this._cachedGeo) {
                 this._cachedGeo = yield this._geoProvider.getGeo();
             }
             const session = yield this.createSession(clientId, this._cachedGeo);
             const sound = yield this.getOTPSound(session);
-            const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce);
+            const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce, responseType);
             console.info(`Navigating to ${authenticateUrl}.`);
             yield navigator.navigate(authenticateUrl);
             yield this._timeout(1000);
@@ -178,17 +180,18 @@ class CyberusKeyAPI {
      *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
      *    The value is passed through unmodified from the Authentication Request to the ID Token.
      *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+     * @param {string} [responseType='code'] OpenId response type. The default is `code` (Code Flow, involving the front-channel and backchannel).
      * @returns {Promise<void>}
      * @memberof CyberusKeyAPI
      */
-    navigateAndGetTheSound(clientId, redirectUri, scope, navigator, state, nonce) {
+    navigateAndGetTheSound(clientId, redirectUri, scope, navigator, state, nonce, responseType = 'code') {
         return __awaiter(this, void 0, void 0, function* () {
             if (this._geoProvider && !this._cachedGeo) {
                 this._cachedGeo = yield this._geoProvider.getGeo();
             }
             const session = yield this.createSession(clientId, this._cachedGeo);
             const sound = yield this.getOTPSound(session);
-            const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce);
+            const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce, responseType);
             console.info(`Navigating to ${authenticateUrl}.`);
             yield navigator.navigate(authenticateUrl);
             yield this._timeout(this._delayMs);

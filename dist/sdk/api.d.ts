@@ -60,11 +60,12 @@ export declare class CyberusKeyAPI {
      *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
      *    The value is passed through unmodified from the Authentication Request to the ID Token.
      *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+     * @param {string} [responseType='code'] OpenId response type. The default is `code` (Code Flow, involving the front-channel and backchannel).
      * @returns OpenID's Authentication endpoint URL
      * @throws InvalidRedirectUriError, InvalidClientError, ResourceNotFoundError
      * @memberof CyberusKeyAPI
      */
-    getAuthenticationEndpointUrl(session: Session, scope: OpenIdScopeParser, clientId: string, redirectUri: string, state?: string, nonce?: string): string;
+    getAuthenticationEndpointUrl(session: Session, scope: OpenIdScopeParser, clientId: string, redirectUri: string, state?: string, nonce?: string, responseType?: string): string;
     /**
      * Makes an authentication with Cyberus Key.
      *
@@ -83,10 +84,11 @@ export declare class CyberusKeyAPI {
      *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
      *    The value is passed through unmodified from the Authentication Request to the ID Token.
      *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+     * @param {string} [responseType='code'] OpenId response type. The default is `code` (Code Flow, involving the front-channel and backchannel).
      * @returns {Promise<void>}
      * @memberof CyberusKeyAPI
      */
-    authenticate(clientId: string, redirectUri: string, scope: OpenIdScopeParser, soundEmitter: SoundEmitter, navigator: Navigator, state?: string, nonce?: string): Promise<void>;
+    authenticate(clientId: string, redirectUri: string, scope: OpenIdScopeParser, soundEmitter: SoundEmitter, navigator: Navigator, state?: string, nonce?: string, responseType?: string): Promise<void>;
     /**
      * Navigates to Authentication Endpoint and returns a sound. You have to emit it.
      *
@@ -104,10 +106,11 @@ export declare class CyberusKeyAPI {
      *    String value used to associate a Client session with an ID Token, and to mitigate replay attacks.
      *    The value is passed through unmodified from the Authentication Request to the ID Token.
      *    Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.
+     * @param {string} [responseType='code'] OpenId response type. The default is `code` (Code Flow, involving the front-channel and backchannel).
      * @returns {Promise<void>}
      * @memberof CyberusKeyAPI
      */
-    navigateAndGetTheSound(clientId: string, redirectUri: string, scope: OpenIdScopeParser, navigator: Navigator, state?: string, nonce?: string): Promise<ArrayBuffer>;
+    navigateAndGetTheSound(clientId: string, redirectUri: string, scope: OpenIdScopeParser, navigator: Navigator, state?: string, nonce?: string, responseType?: string): Promise<ArrayBuffer>;
     private _getUrl;
     private _getUrlEncodedBody;
     private _timeout;

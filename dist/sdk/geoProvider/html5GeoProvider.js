@@ -34,7 +34,7 @@ class HTML5GeoProvider {
                 result = yield this._getGeo();
             }
             catch (_a) {
-                // E.g. user didn't agreed on geolicalization.
+                // E.g. user didn't agree on geolicalization.
                 return null;
             }
             const { coords } = result;

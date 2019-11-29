@@ -8,33 +8,43 @@ import { SoundEmitter } from './soundEmitter';
  * @implements {SoundEmitter}
  */
 export class WebAudioSoundEmitter implements SoundEmitter {
-    /**
-     * Emits a sound through HTML5's AudioContext interface.
-     *
-     * @param {ArrayBuffer} sound A binary record of the sound you want to play.
-     * @returns {Promise<void>}
-     * @memberof WebAudioSoundEmitter
-     */
-    emit(sound: ArrayBuffer) {
 
-        let context: AudioContext;
+  // private _soundPlayingDone: boolean = false;
+  /**
+   * Emits a sound through HTML5's AudioContext interface.
+   *
+   * @param {ArrayBuffer} sound A binary record of the sound you want to play.
+   * @returns {Promise<void>}
+   * @memberof WebAudioSoundEmitter
+   */
+  // constructor(soundPlayingDone: boolean) {
+  //   this._soundPlayingDone = soundPlayingDone;
+  // }
 
-        try {
-            context = new (window["AudioContext"] || window["webkitAudioContext"])();
-        } catch (e) {
-            console.error('AudioContext is not supported.');
+  async emit(sound: ArrayBuffer): Promise<void> {
+    let context: AudioContext;
 
-            throw e;
-        }
-        const source = context.createBufferSource();
+    try {
+      context = new (window['AudioContext'] || window['webkitAudioContext'])();
+    } catch (e) {
+      console.error('AudioContext is not supported.');
 
-        context.decodeAudioData(sound, (decodedData) => {
-                source.buffer = decodedData;
-                source.connect(context.destination);
-                source.start(0);
-            },
-            (error) =>
-                console.error("Error with decoding audio data" + error.message)
-        );
+      throw e;
     }
+    const source = context.createBufferSource();
+
+    context.decodeAudioData(sound, (decodedData) => {
+      source.buffer = decodedData;
+      source.connect(context.destination);
+      source.start(0);
+    },
+    (error) => {
+      console.error('Error with decoding audio data');
+      throw error;
+    }
+    );
+    await (new Promise((resolve) => {
+      source.onended = resolve;
+    }));
+  }
 }

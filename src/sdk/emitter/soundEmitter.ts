@@ -5,5 +5,5 @@
  * @interface SoundEmitter
  */
 export interface SoundEmitter {
-  emit(sound: ArrayBuffer);
+  emit(sound: ArrayBuffer): Promise<void>;
 }

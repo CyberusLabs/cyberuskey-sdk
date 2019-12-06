@@ -1,4 +1,5 @@
 import { SoundEmitter } from './soundEmitter';
+import { OTPGenerationError} from '../errors';
 
 /**
  * Class uses a HTML5's AudioContext interface to play a sound.
@@ -23,22 +24,17 @@ export class WebAudioSoundEmitter implements SoundEmitter {
 
     try {
       context = new (window['AudioContext'] || window['webkitAudioContext'])();
-    } catch (e) {
-      console.error('AudioContext is not supported.');
+    } catch {
 
-      throw e;
+      throw new OTPGenerationError('otp_generation_failure', 'AudioContext is not supported');
     }
     const source = context.createBufferSource();
 
     context.decodeAudioData(sound, (decodedData) => {
-      source.buffer = decodedData;
-      source.connect(context.destination);
-      source.start(0);
-    },
-    (error) => {
-      console.error('Error with decoding audio data');
-      throw error;
-    }
+          source.buffer = decodedData;
+          source.connect(context.destination);
+          source.start(0);
+        }
     );
     await (new Promise((resolve) => {
       source.onended = resolve;
@@ -60,10 +56,9 @@ export class PromiseWebAudioSoundEmitter implements SoundEmitter {
 
     try {
       context = new AudioContext();
-    } catch(e) {
-      console.error('AudioContext is not supported.');
+    } catch {
 
-      throw e;
+      throw new OTPGenerationError('otp_generation_failure', 'AudioContext is not supported');
     }
 
     const audioBuffer = await context.decodeAudioData(sound);

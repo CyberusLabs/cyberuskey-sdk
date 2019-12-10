@@ -11,9 +11,18 @@ import { GeoProvider } from './geoProvider';
  * @implements {GeoProvider}
  */
 export class HTML5GeoProvider implements GeoProvider {
+  private _enableHighAccuracy: boolean;
   private _navigator: Navigator;
 
-  constructor(navigator: Navigator = window.navigator) {
+  /**
+   * Creates an instance of HTML5GeoProvider.
+   *
+   * @param {boolean} [enableHighAccuracy=false]  Forces high accuracy of the geolocation. It may take longer.
+   * @param {Navigator} [navigator=window.navigator]
+   * @memberof HTML5GeoProvider
+   */
+  constructor(enableHighAccuracy = false, navigator: Navigator = window.navigator) {
+    this._enableHighAccuracy = enableHighAccuracy;
     this._navigator = navigator;
   }
 
@@ -27,7 +36,7 @@ export class HTML5GeoProvider implements GeoProvider {
     let result = null;
 
     try {
-      result = await this._getGeo();
+      result = await this._getGeo(this._enableHighAccuracy);
     } catch {
       // E.g. user didn't agree on geolicalization.
       return null;
@@ -38,9 +47,11 @@ export class HTML5GeoProvider implements GeoProvider {
     return new Geolocation(coords.latitude, coords.longitude, coords.accuracy);
   }
 
-  _getGeo(): Promise<Position> {
+  _getGeo(enableHighAccuracy: boolean): Promise<Position> {
     return new Promise((resolve, reject) => {
-      this._navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true })
+      console.log(`enableHighAccuracy: ${enableHighAccuracy}`);
+
+      this._navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy })
     });
   }
 }

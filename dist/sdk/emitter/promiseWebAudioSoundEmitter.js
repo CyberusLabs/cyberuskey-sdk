@@ -11,12 +11,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const errors_1 = require("../errors");
 /**
  * Class uses a HTML5's AudioContext interface to play a sound.
+ * It has known issues with Safari. If you want to support Safari, then use `webAudioSoundEmitter`.
  *
  * @export
- * @class WebAudioSoundEmitter
+ * @class PromiseWebAudioSoundEmitter
  * @implements {SoundEmitter}
  */
-class WebAudioSoundEmitter {
+class PromiseWebAudioSoundEmitter {
     /**
      * Emits a sound through HTML5's AudioContext interface.
      *
@@ -28,22 +29,21 @@ class WebAudioSoundEmitter {
         return __awaiter(this, void 0, void 0, function* () {
             let context;
             try {
-                context = new (window['AudioContext'] || window['webkitAudioContext'])();
+                context = new AudioContext();
             }
             catch (_a) {
                 throw new errors_1.OTPGenerationError('otp_generation_failure', 'AudioContext is not supported');
             }
+            const audioBuffer = yield context.decodeAudioData(sound);
             const source = context.createBufferSource();
-            context.decodeAudioData(sound, (decodedData) => {
-                source.buffer = decodedData;
-                source.connect(context.destination);
-                source.start(0);
-            });
+            source.buffer = audioBuffer;
+            source.connect(context.destination);
             yield (new Promise((resolve) => {
                 source.onended = resolve;
+                source.start(0);
             }));
         });
     }
 }
-exports.WebAudioSoundEmitter = WebAudioSoundEmitter;
-//# sourceMappingURL=webAudioSoundEmitter.js.map
+exports.PromiseWebAudioSoundEmitter = PromiseWebAudioSoundEmitter;
+//# sourceMappingURL=promiseWebAudioSoundEmitter.js.map

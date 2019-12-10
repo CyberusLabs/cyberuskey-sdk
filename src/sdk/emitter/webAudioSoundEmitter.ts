@@ -1,5 +1,5 @@
 import { SoundEmitter } from './soundEmitter';
-import { OTPGenerationError} from '../errors';
+import { OTPGenerationError } from '../errors';
 
 /**
  * Class uses a HTML5's AudioContext interface to play a sound.
@@ -17,8 +17,6 @@ export class WebAudioSoundEmitter implements SoundEmitter {
    * @returns {Promise<void>}
    * @memberof WebAudioSoundEmitter
    */
-
-
   async emit(sound: ArrayBuffer): Promise<void> {
     let context: AudioContext;
 
@@ -28,49 +26,18 @@ export class WebAudioSoundEmitter implements SoundEmitter {
 
       throw new OTPGenerationError('otp_generation_failure', 'AudioContext is not supported');
     }
+
     const source = context.createBufferSource();
 
     context.decodeAudioData(sound, (decodedData) => {
-          source.buffer = decodedData;
-          source.connect(context.destination);
-          source.start(0);
-        }
-    );
-    await (new Promise((resolve) => {
-      source.onended = resolve;
-    }));
-  }
-}
-
-export class PromiseWebAudioSoundEmitter implements SoundEmitter {
-
-  /**
-   * Emits a sound through HTML5's AudioContext interface.
-   *
-   * @param {ArrayBuffer} sound A binary record of the sound you want to play.
-   * @returns {Promise<void>}
-   * @memberof WebAudioSoundEmitter
-   */
-  async emit(sound: ArrayBuffer): Promise<void> {
-    let context: AudioContext;
-
-    try {
-      context = new AudioContext();
-    } catch {
-
-      throw new OTPGenerationError('otp_generation_failure', 'AudioContext is not supported');
-    }
-
-    const audioBuffer = await context.decodeAudioData(sound);
-    const source = context.createBufferSource();
-
-    source.buffer = audioBuffer;
-
-    source.connect(context.destination);
-
-    await (new Promise((resolve) => {
-      source.onended = resolve;
+      source.buffer = decodedData;
+      source.connect(context.destination);
       source.start(0);
+    });
+
+    await (new Promise((resolve) => {
+      source.onended = resolve;
     }));
   }
 }
+

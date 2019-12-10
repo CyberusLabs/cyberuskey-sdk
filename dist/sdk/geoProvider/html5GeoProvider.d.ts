@@ -9,8 +9,16 @@ import { GeoProvider } from './geoProvider';
  * @implements {GeoProvider}
  */
 export declare class HTML5GeoProvider implements GeoProvider {
+    private _enableHighAccuracy;
     private _navigator;
-    constructor(navigator?: Navigator);
+    /**
+     * Creates an instance of HTML5GeoProvider.
+     *
+     * @param {boolean} [enableHighAccuracy=false]  Forces high accuracy of the geolocation. It may take longer.
+     * @param {Navigator} [navigator=window.navigator]
+     * @memberof HTML5GeoProvider
+     */
+    constructor(enableHighAccuracy?: boolean, navigator?: Navigator);
     /**
      * Gets a geolocalization measurement.
      *
@@ -18,5 +26,5 @@ export declare class HTML5GeoProvider implements GeoProvider {
      * @memberof HTML5GeoProvider
      */
     getGeo(): Promise<Geolocation>;
-    _getGeo(): Promise<Position>;
+    _getGeo(enableHighAccuracy: boolean): Promise<Position>;
 }

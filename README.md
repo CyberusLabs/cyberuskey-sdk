@@ -47,6 +47,8 @@ You can also get a minified file from JSDelivr's CDN:
 <dd></dd>
 <dt><a href="#Session">Session</a></dt>
 <dd></dd>
+<dt><a href="#PromiseWebAudioSoundEmitter">PromiseWebAudioSoundEmitter</a></dt>
+<dd></dd>
 <dt><a href="#WebAudioSoundEmitter">WebAudioSoundEmitter</a></dt>
 <dd></dd>
 <dt><a href="#Geolocation">Geolocation</a></dt>
@@ -249,6 +251,17 @@ const scope = scopeParser.addEmail().addProfile().getValue();
 #### new Session()
 <p>A UTC date representing a date (and time) when a session has been created.</p>
 
+<a name="PromiseWebAudioSoundEmitter"></a>
+
+## PromiseWebAudioSoundEmitter
+**Kind**: global class  
+**Implements**: <code>SoundEmitter</code>  
+<a name="new_PromiseWebAudioSoundEmitter_new"></a>
+
+### new PromiseWebAudioSoundEmitter()
+<p>Class uses a HTML5's AudioContext interface to play a sound.
+It has known issues with Safari. If you want to support Safari, then use <code>webAudioSoundEmitter</code>.</p>
+
 <a name="WebAudioSoundEmitter"></a>
 
 ## WebAudioSoundEmitter
@@ -257,7 +270,10 @@ const scope = scopeParser.addEmail().addProfile().getValue();
 
 * [WebAudioSoundEmitter](#WebAudioSoundEmitter)
     * [new WebAudioSoundEmitter()](#new_WebAudioSoundEmitter_new)
-    * [.emit(sound)](#WebAudioSoundEmitter+emit) ⇒ <code>Promise.&lt;void&gt;</code>
+    * _instance_
+        * [.emit(sound)](#WebAudioSoundEmitter+emit) ⇒ <code>Promise.&lt;void&gt;</code>
+    * _static_
+        * [.PromiseWebAudioSoundEmitter#emit(sound)](#WebAudioSoundEmitter.PromiseWebAudioSoundEmitter+emit) ⇒ <code>Promise.&lt;void&gt;</code>
 
 <a name="new_WebAudioSoundEmitter_new"></a>
 
@@ -270,6 +286,17 @@ const scope = scopeParser.addEmail().addProfile().getValue();
 <p>Emits a sound through HTML5's AudioContext interface.</p>
 
 **Kind**: instance method of [<code>WebAudioSoundEmitter</code>](#WebAudioSoundEmitter)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| sound | <code>ArrayBuffer</code> | <p>A binary record of the sound you want to play.</p> |
+
+<a name="WebAudioSoundEmitter.PromiseWebAudioSoundEmitter+emit"></a>
+
+### WebAudioSoundEmitter.PromiseWebAudioSoundEmitter#emit(sound) ⇒ <code>Promise.&lt;void&gt;</code>
+<p>Emits a sound through HTML5's AudioContext interface.</p>
+
+**Kind**: static method of [<code>WebAudioSoundEmitter</code>](#WebAudioSoundEmitter)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -320,7 +347,11 @@ const scope = scopeParser.addEmail().addProfile().getValue();
 
 * [HTML5GeoProvider](#HTML5GeoProvider)
     * [new HTML5GeoProvider()](#new_HTML5GeoProvider_new)
-    * [.getGeo()](#HTML5GeoProvider+getGeo) ⇒ [<code>Promise.&lt;Geolocation&gt;</code>](#Geolocation)
+    * _instance_
+        * [.getGeo()](#HTML5GeoProvider+getGeo) ⇒ [<code>Promise.&lt;Geolocation&gt;</code>](#Geolocation)
+    * _static_
+        * [.HTML5GeoProvider](#HTML5GeoProvider.HTML5GeoProvider)
+            * [new HTML5GeoProvider([enableHighAccuracy], [navigator])](#new_HTML5GeoProvider.HTML5GeoProvider_new)
 
 <a name="new_HTML5GeoProvider_new"></a>
 
@@ -335,6 +366,21 @@ It uses a HTML5's <code>Geolocation.getCurrentPosition()</code> method.</p>
 
 **Kind**: instance method of [<code>HTML5GeoProvider</code>](#HTML5GeoProvider)  
 **Returns**: [<code>Promise.&lt;Geolocation&gt;</code>](#Geolocation) - <p>Geolocalization measurement.</p>  
+<a name="HTML5GeoProvider.HTML5GeoProvider"></a>
+
+### HTML5GeoProvider.HTML5GeoProvider
+**Kind**: static class of [<code>HTML5GeoProvider</code>](#HTML5GeoProvider)  
+<a name="new_HTML5GeoProvider.HTML5GeoProvider_new"></a>
+
+#### new HTML5GeoProvider([enableHighAccuracy], [navigator])
+<p>Creates an instance of HTML5GeoProvider.</p>
+
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [enableHighAccuracy] | <code>boolean</code> | <code>false</code> | <p>Forces high accuracy of the geolocation. It may take longer.</p> |
+| [navigator] | <code>Navigator</code> | <code>window.navigator</code> |  |
+
 <a name="RedirectNavigator"></a>
 
 ## RedirectNavigator

@@ -183,7 +183,7 @@ You can also get a minified file from JSDelivr's CDN:
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| hostUrl | <code>string</code> |  | <p>Base URL of the host server, e.g. <code>https://auth-server-demo.cyberuslabs.net</code></p> |
+| hostUrl | <code>string</code> |  | <p>Base URL of the host server, e.g. <code>https://production-api.cyberuskey.com</code></p> |
 | [geoProvider] | <code>GeoProvider</code> |  | <p>Geolocalization provider. Use specific implementation like <code>HTML5GeoProvider</code>.</p> |
 | [delayMs] | <code>number</code> | <code>600</code> | <p>Delay (ms) between making an Authentication request and a sound playing.</p> |
 

@@ -16,7 +16,7 @@ export declare class CyberusKeyAPI {
     private _delayMs;
     /**
      *Creates an instance of CyberusKeyAPI.
-     * @param {string} hostUrl Base URL of the host server, e.g. `https://auth-server-demo.cyberuslabs.net`
+     * @param {string} hostUrl Base URL of the host server, e.g. `https://production-api.cyberuskey.com`
      * @param {GeoProvider} [geoProvider] Geolocalization provider. Use specific implementation like `HTML5GeoProvider`.
      * @param {number} [delayMs=600] Delay (ms) between making an Authentication request and a sound playing.
      * @memberof CyberusKeyAPI

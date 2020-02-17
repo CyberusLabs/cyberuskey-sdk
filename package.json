@@ -1,6 +1,6 @@
 {
   "name": "cyberuskey-sdk",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Cyberus Key SDK",
   "main": "dist/index.js",
   "author": "Cyberus Labs",

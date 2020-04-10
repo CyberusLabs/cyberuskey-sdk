@@ -16,7 +16,7 @@ export declare class Geolocation {
      * @type {number}
      * @memberof Geolocation
      */
-    readonly latitude: number;
+    get latitude(): number;
     /**
      * Gets a longitude.
      *
@@ -24,7 +24,7 @@ export declare class Geolocation {
      * @type {number}
      * @memberof Geolocation
      */
-    readonly longitude: number;
+    get longitude(): number;
     /**
      * Gets an accuracy of a measurement.
      *
@@ -32,5 +32,5 @@ export declare class Geolocation {
      * @type {number}
      * @memberof Geolocation
      */
-    readonly accuracy: number;
+    get accuracy(): number;
 }

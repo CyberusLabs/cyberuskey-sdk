@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -35,16 +36,20 @@ class CyberusKeyAPI {
      * @param {Geolocation} [geo] Give a value if you want to pass optional geolocation measurement.
      *    It can be later use to compare it against the mobile's measurement (if you have set `fail_on_geo_mismatch`).
      *    Those measurements can be used also to general improvement of the security.
+     * @param {string} [origin] The origin domain of the request being made. If `null` then the Referer header will be used.
      * @throws WrongJsonError, OpenApiError, ResourceNotFoundError, OTPGenerationError, UnknownError
      * @returns {Promise<Session>} The Cyberus Key session.
      * @memberof CyberusKeyAPI
      */
-    createSession(clientId, geo) {
+    createSession(clientId, geo, origin) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = { client_id: clientId };
             if (geo) {
                 data['lat'] = geo.latitude;
                 data['lng'] = geo.longitude;
+            }
+            if (origin) {
+                data['origin'] = origin;
             }
             const response = yield fetch(this._getUrl('sessions'), {
                 method: 'POST',
@@ -135,6 +140,7 @@ class CyberusKeyAPI {
      *    Once the user authorizes the requested scopes, the claims are returned in an ID Token.
      * @param {SoundEmitter} soundEmitter Interface which can play a sound.
      * @param {Navigator} navigator Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.
+     * @param {string} [origin] The origin domain of the request being made. If `null` then the Referer header will be used.
      * @param {string} [state]
      *    RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie.
      *    The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response.
@@ -148,12 +154,12 @@ class CyberusKeyAPI {
      * @returns {Promise<void>}
      * @memberof CyberusKeyAPI
      */
-    authenticate(clientId, redirectUri, scope, soundEmitter, navigator, state, nonce, responseType = 'code') {
+    authenticate(clientId, redirectUri, scope, soundEmitter, navigator, origin, state, nonce, responseType = 'code') {
         return __awaiter(this, void 0, void 0, function* () {
             if (this._geoProvider && !this._cachedGeo) {
                 this._cachedGeo = yield this._geoProvider.getGeo();
             }
-            const session = yield this.createSession(clientId, this._cachedGeo);
+            const session = yield this.createSession(clientId, this._cachedGeo, origin);
             const sound = yield this.getOTPSound(session);
             const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce, responseType);
             console.info(`Navigating to ${authenticateUrl}.`);
@@ -171,6 +177,7 @@ class CyberusKeyAPI {
      * @param {OpenIdScopeParser} scope Each scope returns a set of user attributes, which are called claims.
      *    Once the user authorizes the requested scopes, the claims are returned in an ID Token.
      * @param {Navigator} navigator Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.
+     * @param {string} [origin] The origin domain of the request being made. If `null` then the Referer header will be used.
      * @param {string} [state]
      *    RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie.
      *    The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response.
@@ -184,18 +191,43 @@ class CyberusKeyAPI {
      * @returns {Promise<void>}
      * @memberof CyberusKeyAPI
      */
-    navigateAndGetTheSound(clientId, redirectUri, scope, navigator, state, nonce, responseType = 'code') {
+    navigateAndGetTheSound(clientId, redirectUri, scope, navigator, origin, state, nonce, responseType = 'code') {
         return __awaiter(this, void 0, void 0, function* () {
             if (this._geoProvider && !this._cachedGeo) {
                 this._cachedGeo = yield this._geoProvider.getGeo();
             }
-            const session = yield this.createSession(clientId, this._cachedGeo);
+            const session = yield this.createSession(clientId, this._cachedGeo, origin);
             const sound = yield this.getOTPSound(session);
             const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce, responseType);
             console.info(`Navigating to ${authenticateUrl}.`);
             yield navigator.navigate(authenticateUrl);
             yield this._timeout(this._delayMs);
             return sound;
+        });
+    }
+    loginThroughCyberusKeyDashboard(options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = {
+                client_id: options.clientId,
+                scope: options.scope.getValue(),
+                redirect_uri: options.redirectUri,
+                response_type: options.responseType,
+                display: options.display,
+                prompt: options.prompt,
+                theme: options.theme,
+            };
+            if (options.state) {
+                data['state'] = options.state;
+            }
+            if (options.nonce) {
+                data['nonce'] = options.nonce;
+            }
+            const url = new URL(this._getUrl('authorize'));
+            Object.keys(data).forEach((parameterName) => {
+                url.searchParams.append(parameterName, data[parameterName]);
+            });
+            console.info(`Navigating to ${url.href}.`);
+            yield options.navigator.navigate(url.href);
         });
     }
     _getUrl(path) {

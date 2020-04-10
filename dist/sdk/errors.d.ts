@@ -13,8 +13,8 @@ declare enum ErrorCode {
 declare class CyberusKeyError extends Error {
     private _code;
     constructor(code: keyof typeof ErrorCode, message: string);
-    readonly code: string;
-    readonly description: string;
+    get code(): string;
+    get description(): string;
 }
 declare class UnknownError extends CyberusKeyError {
     constructor(code?: keyof typeof ErrorCode, message?: string);

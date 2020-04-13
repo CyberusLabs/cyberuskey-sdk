@@ -212,6 +212,8 @@ class CyberusKeyAPI {
                 scope: options.scope.getValue(),
                 redirect_uri: options.redirectUri,
                 response_type: options.responseType,
+                state: options.state,
+                nonce: options.nonce,
                 display: options.display,
                 prompt: options.prompt,
                 theme: options.theme,

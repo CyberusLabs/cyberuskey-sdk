@@ -238,7 +238,7 @@ export class CyberusKeyAPI {
       response_type: options.responseType,
       state: options.state,
       nonce: options.nonce,
-      display: options.display,
+      display: options.display || 'page',
       prompt: options.prompt,
       theme: options.theme,
     };
@@ -251,7 +251,7 @@ export class CyberusKeyAPI {
       data['nonce'] = options.nonce;
     }
 
-    const url = new URL(this._getUrl('authorize'));
+    const url = new URL(this._getUrl('authenticate'));
 
     Object.keys(data).forEach((parameterName) => {
       url.searchParams.append(parameterName, data[parameterName]);

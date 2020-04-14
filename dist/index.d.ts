@@ -9,5 +9,6 @@ export * from './sdk/session';
 export * from './sdk/geoProvider/geo';
 export * from './sdk/geoProvider/geoProvider';
 export * from './sdk/geoProvider/html5GeoProvider';
+export * from './sdk/loginOptions';
 import { CyberusKeyAPI } from './sdk/api';
 export default CyberusKeyAPI;

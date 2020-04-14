@@ -43,6 +43,8 @@ You can also get a minified file from JSDelivr's CDN:
 <dl>
 <dt><a href="#CyberusKeyAPI">CyberusKeyAPI</a></dt>
 <dd></dd>
+<dt><a href="#LoginOptions">LoginOptions</a></dt>
+<dd></dd>
 <dt><a href="#OpenIdScopeParser">OpenIdScopeParser</a></dt>
 <dd></dd>
 <dt><a href="#Session">Session</a></dt>
@@ -67,11 +69,11 @@ You can also get a minified file from JSDelivr's CDN:
 * [CyberusKeyAPI](#CyberusKeyAPI)
     * [new CyberusKeyAPI()](#new_CyberusKeyAPI_new)
     * _instance_
-        * [.createSession(clientId, [geo])](#CyberusKeyAPI+createSession) ⇒ [<code>Promise.&lt;Session&gt;</code>](#Session)
+        * [.createSession(clientId, [geo], [origin])](#CyberusKeyAPI+createSession) ⇒ [<code>Promise.&lt;Session&gt;</code>](#Session)
         * [.getOTPSound(session)](#CyberusKeyAPI+getOTPSound) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
         * [.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, [state], [nonce], [responseType])](#CyberusKeyAPI+getAuthenticationEndpointUrl) ⇒
-        * [.authenticate(clientId, redirectUri, scope, soundEmitter, navigator, [state], [nonce], [responseType])](#CyberusKeyAPI+authenticate) ⇒ <code>Promise.&lt;void&gt;</code>
-        * [.navigateAndGetTheSound(clientId, redirectUri, scope, navigator, [state], [nonce], [responseType])](#CyberusKeyAPI+navigateAndGetTheSound) ⇒ <code>Promise.&lt;void&gt;</code>
+        * [.authenticate(clientId, redirectUri, scope, soundEmitter, navigator, [origin], [state], [nonce], [responseType])](#CyberusKeyAPI+authenticate) ⇒ <code>Promise.&lt;void&gt;</code>
+        * [.navigateAndGetTheSound(clientId, redirectUri, scope, navigator, [origin], [state], [nonce], [responseType])](#CyberusKeyAPI+navigateAndGetTheSound) ⇒ <code>Promise.&lt;void&gt;</code>
     * _static_
         * [.CyberusKeyAPI](#CyberusKeyAPI.CyberusKeyAPI)
             * [new CyberusKeyAPI(hostUrl, [geoProvider], [delayMs])](#new_CyberusKeyAPI.CyberusKeyAPI_new)
@@ -83,7 +85,7 @@ You can also get a minified file from JSDelivr's CDN:
 
 <a name="CyberusKeyAPI+createSession"></a>
 
-### cyberusKeyAPI.createSession(clientId, [geo]) ⇒ [<code>Promise.&lt;Session&gt;</code>](#Session)
+### cyberusKeyAPI.createSession(clientId, [geo], [origin]) ⇒ [<code>Promise.&lt;Session&gt;</code>](#Session)
 <p>Creates the Cyberus Key session.</p>
 
 **Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
@@ -97,6 +99,7 @@ You can also get a minified file from JSDelivr's CDN:
 | --- | --- | --- |
 | clientId | <code>string</code> | <p>Public client ID generated during creating the account.</p> |
 | [geo] | [<code>Geolocation</code>](#Geolocation) | <p>Give a value if you want to pass optional geolocation measurement. It can be later use to compare it against the mobile's measurement (if you have set <code>fail_on_geo_mismatch</code>). Those measurements can be used also to general improvement of the security.</p> |
+| [origin] | <code>string</code> | <p>The origin domain of the request being made. If <code>null</code> then the Referer header will be used.</p> |
 
 <a name="CyberusKeyAPI+getOTPSound"></a>
 
@@ -138,7 +141,7 @@ You can also get a minified file from JSDelivr's CDN:
 
 <a name="CyberusKeyAPI+authenticate"></a>
 
-### cyberusKeyAPI.authenticate(clientId, redirectUri, scope, soundEmitter, navigator, [state], [nonce], [responseType]) ⇒ <code>Promise.&lt;void&gt;</code>
+### cyberusKeyAPI.authenticate(clientId, redirectUri, scope, soundEmitter, navigator, [origin], [state], [nonce], [responseType]) ⇒ <code>Promise.&lt;void&gt;</code>
 <p>Makes an authentication with Cyberus Key.</p>
 
 **Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
@@ -150,13 +153,14 @@ You can also get a minified file from JSDelivr's CDN:
 | scope | [<code>OpenIdScopeParser</code>](#OpenIdScopeParser) |  | <p>Each scope returns a set of user attributes, which are called claims. Once the user authorizes the requested scopes, the claims are returned in an ID Token.</p> |
 | soundEmitter | <code>SoundEmitter</code> |  | <p>Interface which can play a sound.</p> |
 | navigator | <code>Navigator</code> |  | <p>Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.</p> |
+| [origin] | <code>string</code> |  | <p>The origin domain of the request being made. If <code>null</code> then the Referer header will be used.</p> |
 | [state] | <code>string</code> |  | <p>RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie. The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response. It’s that unique and non-guessable value that allows you to prevent the attack by confirming if the value coming from the response matches the one you expect (the one you generated when initiating the request). The state parameter is a string so you can encode any other information in it.</p> |
 | [nonce] | <code>string</code> |  | <p>String value used to associate a Client session with an ID Token, and to mitigate replay attacks. The value is passed through unmodified from the Authentication Request to the ID Token. Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.</p> |
 | [responseType] | <code>string</code> | <code>&quot;&#x27;code&#x27;&quot;</code> | <p>OpenId response type. The default is <code>code</code> (Code Flow, involving the front-channel and backchannel).</p> |
 
 <a name="CyberusKeyAPI+navigateAndGetTheSound"></a>
 
-### cyberusKeyAPI.navigateAndGetTheSound(clientId, redirectUri, scope, navigator, [state], [nonce], [responseType]) ⇒ <code>Promise.&lt;void&gt;</code>
+### cyberusKeyAPI.navigateAndGetTheSound(clientId, redirectUri, scope, navigator, [origin], [state], [nonce], [responseType]) ⇒ <code>Promise.&lt;void&gt;</code>
 <p>Navigates to Authentication Endpoint and returns a sound. You have to emit it.</p>
 
 **Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
@@ -167,6 +171,7 @@ You can also get a minified file from JSDelivr's CDN:
 | redirectUri | <code>string</code> |  | <p>Redirect URI to which the response will be sent. If the value is not whitelisted then the request will fail.</p> |
 | scope | [<code>OpenIdScopeParser</code>](#OpenIdScopeParser) |  | <p>Each scope returns a set of user attributes, which are called claims. Once the user authorizes the requested scopes, the claims are returned in an ID Token.</p> |
 | navigator | <code>Navigator</code> |  | <p>Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.</p> |
+| [origin] | <code>string</code> |  | <p>The origin domain of the request being made. If <code>null</code> then the Referer header will be used.</p> |
 | [state] | <code>string</code> |  | <p>RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie. The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response. It’s that unique and non-guessable value that allows you to prevent the attack by confirming if the value coming from the response matches the one you expect (the one you generated when initiating the request). The state parameter is a string so you can encode any other information in it.</p> |
 | [nonce] | <code>string</code> |  | <p>String value used to associate a Client session with an ID Token, and to mitigate replay attacks. The value is passed through unmodified from the Authentication Request to the ID Token. Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.</p> |
 | [responseType] | <code>string</code> | <code>&quot;&#x27;code&#x27;&quot;</code> | <p>OpenId response type. The default is <code>code</code> (Code Flow, involving the front-channel and backchannel).</p> |
@@ -187,6 +192,56 @@ You can also get a minified file from JSDelivr's CDN:
 | [geoProvider] | <code>GeoProvider</code> |  | <p>Geolocalization provider. Use specific implementation like <code>HTML5GeoProvider</code>.</p> |
 | [delayMs] | <code>number</code> | <code>600</code> | <p>Delay (ms) between making an Authentication request and a sound playing.</p> |
 
+<a name="LoginOptions"></a>
+
+## LoginOptions
+**Kind**: global class  
+
+* [LoginOptions](#LoginOptions)
+    * [new LoginOptions()](#new_LoginOptions_new)
+    * [.responseType](#LoginOptions.responseType) : <code>string</code>
+    * [.display](#LoginOptions.display) : <code>string</code>
+    * [.prompt](#LoginOptions.prompt) : <code>string</code>
+    * [.theme](#LoginOptions.theme) : <code>string</code>
+
+<a name="new_LoginOptions_new"></a>
+
+### new LoginOptions()
+<p>Login options.</p>
+
+<a name="LoginOptions.responseType"></a>
+
+### LoginOptions.responseType : <code>string</code>
+**Kind**: static property of [<code>LoginOptions</code>](#LoginOptions)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [responseType] | <code>string</code> | <code>&quot;&#x27;code&#x27;&quot;</code> | <p>OpenId response type. The default is <code>code</code> (Code Flow, involving the front-channel and backchannel).</p> |
+
+<a name="LoginOptions.display"></a>
+
+### LoginOptions.display : <code>string</code>
+**Kind**: static property of [<code>LoginOptions</code>](#LoginOptions)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| display | <code>string</code> | <p>It specifies how the Authorization Server displays the authentication and consent user interface pages to the End-User. Default and the only supported value is <code>page</code>.</p> |
+
+<a name="LoginOptions.prompt"></a>
+
+### LoginOptions.prompt : <code>string</code>
+**Kind**: static property of [<code>LoginOptions</code>](#LoginOptions)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| prompt | <code>string</code> | <p>Space delimited, case sensitive list of string values that specifies whether the Authorization Server prompts the End-User for reauthentication and consent. The defined values are: <code>login</code>, <code>none</code>. Default is <code>login,none</code>. Can't be changed for now.</p> |
+
+<a name="LoginOptions.theme"></a>
+
+### LoginOptions.theme : <code>string</code>
+<p>Theme of the login page of Cyberus Key Dashboard. Default is <code>default</code>.</p>
+
+**Kind**: static property of [<code>LoginOptions</code>](#LoginOptions)  
 <a name="OpenIdScopeParser"></a>
 
 ## OpenIdScopeParser

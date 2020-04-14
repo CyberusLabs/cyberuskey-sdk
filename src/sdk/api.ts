@@ -5,6 +5,7 @@ import { GeoProvider } from './geoProvider/geoProvider';
 import { Navigator } from './navigator/navigator';
 import { OpenIdScopeParser } from './scopeParser';
 import { Session } from './session';
+import { LoginOptions } from './loginOptions';
 
 
 /**
@@ -38,16 +39,21 @@ export class CyberusKeyAPI {
    * @param {Geolocation} [geo] Give a value if you want to pass optional geolocation measurement.
    *    It can be later use to compare it against the mobile's measurement (if you have set `fail_on_geo_mismatch`).
    *    Those measurements can be used also to general improvement of the security.
+   * @param {string} [origin] The origin domain of the request being made. If `null` then the Referer header will be used.
    * @throws WrongJsonError, OpenApiError, ResourceNotFoundError, OTPGenerationError, UnknownError
    * @returns {Promise<Session>} The Cyberus Key session.
    * @memberof CyberusKeyAPI
    */
-  public async createSession(clientId: string, geo?: Geolocation): Promise<Session> {
+  public async createSession(clientId: string, geo?: Geolocation, origin?: string): Promise<Session> {
     const data = { client_id: clientId };
 
     if (geo) {
       data['lat'] = geo.latitude;
       data['lng'] = geo.longitude;
+    }
+
+    if (origin) {
+      data['origin'] = origin;
     }
 
     const response = await fetch(this._getUrl('sessions'), {
@@ -148,6 +154,7 @@ export class CyberusKeyAPI {
    *    Once the user authorizes the requested scopes, the claims are returned in an ID Token.
    * @param {SoundEmitter} soundEmitter Interface which can play a sound.
    * @param {Navigator} navigator Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.
+   * @param {string} [origin] The origin domain of the request being made. If `null` then the Referer header will be used.
    * @param {string} [state]
    *    RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie.
    *    The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response.
@@ -161,12 +168,12 @@ export class CyberusKeyAPI {
    * @returns {Promise<void>}
    * @memberof CyberusKeyAPI
    */
-  public async authenticate(clientId: string, redirectUri: string, scope: OpenIdScopeParser, soundEmitter: SoundEmitter, navigator: Navigator, state?: string, nonce?: string, responseType = 'code'): Promise<void> {
+  public async authenticate(clientId: string, redirectUri: string, scope: OpenIdScopeParser, soundEmitter: SoundEmitter, navigator: Navigator, origin?: string, state?: string, nonce?: string, responseType = 'code'): Promise<void> {
     if (this._geoProvider && !this._cachedGeo) {
       this._cachedGeo = await this._geoProvider.getGeo();
     }
 
-    const session = await this.createSession(clientId, this._cachedGeo);
+    const session = await this.createSession(clientId, this._cachedGeo, origin);
     const sound = await this.getOTPSound(session);
 
     const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce, responseType);
@@ -190,6 +197,7 @@ export class CyberusKeyAPI {
    * @param {OpenIdScopeParser} scope Each scope returns a set of user attributes, which are called claims.
    *    Once the user authorizes the requested scopes, the claims are returned in an ID Token.
    * @param {Navigator} navigator Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.
+   * @param {string} [origin] The origin domain of the request being made. If `null` then the Referer header will be used.
    * @param {string} [state]
    *    RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie.
    *    The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response.
@@ -203,12 +211,12 @@ export class CyberusKeyAPI {
    * @returns {Promise<void>}
    * @memberof CyberusKeyAPI
    */
-  public async navigateAndGetTheSound(clientId: string, redirectUri: string, scope: OpenIdScopeParser, navigator: Navigator, state?: string, nonce?: string, responseType = 'code'): Promise<ArrayBuffer> {
+  public async navigateAndGetTheSound(clientId: string, redirectUri: string, scope: OpenIdScopeParser, navigator: Navigator, origin?: string, state?: string, nonce?: string, responseType = 'code'): Promise<ArrayBuffer> {
     if (this._geoProvider && !this._cachedGeo) {
       this._cachedGeo = await this._geoProvider.getGeo();
     }
 
-    const session = await this.createSession(clientId, this._cachedGeo);
+    const session = await this.createSession(clientId, this._cachedGeo, origin);
     const sound = await this.getOTPSound(session);
 
     const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce, responseType);
@@ -220,6 +228,38 @@ export class CyberusKeyAPI {
     await this._timeout(this._delayMs);
 
     return sound;
+  }
+
+  public async loginThroughCyberusKeyDashboard(options: LoginOptions): Promise<void> {
+    const data: any = {
+      client_id: options.clientId,
+      scope: options.scope.getValue(),
+      redirect_uri: options.redirectUri,
+      response_type: options.responseType,
+      state: options.state,
+      nonce: options.nonce,
+      display: options.display || 'page',
+      prompt: options.prompt,
+      theme: options.theme,
+    };
+
+    if (options.state) {
+      data['state'] = options.state;
+    }
+
+    if (options.nonce) {
+      data['nonce'] = options.nonce;
+    }
+
+    const url = new URL(this._getUrl('authenticate'));
+
+    Object.keys(data).forEach((parameterName) => {
+      url.searchParams.append(parameterName, data[parameterName]);
+    });
+
+    console.info(`Navigating to ${url.href}.`);
+
+    await options.navigator.navigate(url.href);
   }
 
   private _getUrl(path: string): string {

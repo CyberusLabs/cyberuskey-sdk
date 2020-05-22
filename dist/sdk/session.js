@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Session = void 0;
 /**
  * Data class representing a Cyberus Key session.
  *

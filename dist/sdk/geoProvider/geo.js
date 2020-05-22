@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Geolocation = void 0;
 /**
  * An abstraction for a taken geolocation measurement.
  *

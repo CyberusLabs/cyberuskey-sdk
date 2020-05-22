@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.HTML5GeoProvider = void 0;
 const geo_1 = require("./geo");
 /**
  * Class provides a geolocalization measurement.

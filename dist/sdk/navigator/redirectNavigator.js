@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.RedirectNavigator = void 0;
 const errors_1 = require("../errors");
 /**
  * Class describes how OpenID's Authentication Endpoint will be handled.

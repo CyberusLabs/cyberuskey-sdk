@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.OpenIdScopeParser = void 0;
 /**
  * Handy class to define an OpenID's scope.
  * Scopes are used by an application during authentication to authorize access to a user's details,

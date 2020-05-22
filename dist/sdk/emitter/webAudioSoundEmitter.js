@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.WebAudioSoundEmitter = void 0;
 const errors_1 = require("../errors");
 /**
  * Class uses a HTML5's AudioContext interface to play a sound.

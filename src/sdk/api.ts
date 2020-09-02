@@ -39,10 +39,10 @@ export class CyberusKeyAPI {
    *    Those measurements can be used also to general improvement of the security.
    * @param {string} [origin] The origin domain of the request being made. If `null` then the Referer header will be used.
    * @throws WrongJsonError, OpenApiError, ResourceNotFoundError, OTPGenerationError, UnknownError
-   * @returns {Promise<Session>} The Cyberus Key session.
+   * @returns {Promise<string>} The Cyberus Key session id.
    * @memberof CyberusKeyAPI
    */
-  public async createSession(clientId: string, origin?: string,geo?: Geolocation): Promise<Session> {
+  public async createSession(clientId: string, origin?: string,geo?: Geolocation): Promise<string> {
     const data = { client_id: clientId };
 
     if (geo) {

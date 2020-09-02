@@ -49,10 +49,6 @@ You can also get a minified file from JSDelivr's CDN:
 <dd></dd>
 <dt><a href="#Session">Session</a></dt>
 <dd></dd>
-<dt><a href="#PromiseWebAudioSoundEmitter">PromiseWebAudioSoundEmitter</a></dt>
-<dd></dd>
-<dt><a href="#WebAudioSoundEmitter">WebAudioSoundEmitter</a></dt>
-<dd></dd>
 <dt><a href="#Geolocation">Geolocation</a></dt>
 <dd></dd>
 <dt><a href="#HTML5GeoProvider">HTML5GeoProvider</a></dt>
@@ -71,9 +67,8 @@ You can also get a minified file from JSDelivr's CDN:
     * _instance_
         * [.createSession(clientId, [geo], [origin])](#CyberusKeyAPI+createSession) ⇒ [<code>Promise.&lt;Session&gt;</code>](#Session)
         * [.getOTPSound(session)](#CyberusKeyAPI+getOTPSound) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
-        * [.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, [state], [nonce], [responseType])](#CyberusKeyAPI+getAuthenticationEndpointUrl) ⇒
-        * [.authenticate(clientId, redirectUri, scope, soundEmitter, navigator, [origin], [state], [nonce], [responseType])](#CyberusKeyAPI+authenticate) ⇒ <code>Promise.&lt;void&gt;</code>
-        * [.navigateAndGetTheSound(clientId, redirectUri, scope, navigator, [origin], [state], [nonce], [responseType])](#CyberusKeyAPI+navigateAndGetTheSound) ⇒ <code>Promise.&lt;void&gt;</code>
+        * [.getAuthenticationEndpointUrl(sessionId, scope, clientId, redirectUri, [state], [nonce], [responseType])](#CyberusKeyAPI+getAuthenticationEndpointUrl) ⇒
+        * [.navigateAuthentication(clientId, redirectUri, scope, navigator, session, [origin], [state], [nonce], [responseType])](#CyberusKeyAPI+navigateAuthentication) ⇒ <code>Promise.&lt;void&gt;</code>
     * _static_
         * [.CyberusKeyAPI](#CyberusKeyAPI.CyberusKeyAPI)
             * [new CyberusKeyAPI(hostUrl, [geoProvider], [delayMs])](#new_CyberusKeyAPI.CyberusKeyAPI_new)
@@ -104,7 +99,7 @@ You can also get a minified file from JSDelivr's CDN:
 <a name="CyberusKeyAPI+getOTPSound"></a>
 
 ### cyberusKeyAPI.getOTPSound(session) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
-<p>Gets a sonic sound with embedded OTP.</p>
+<p>Gets a sonic sound with embedded OTP. You have to emit it.</p>
 
 **Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
 **Returns**: <code>Promise.&lt;ArrayBuffer&gt;</code> - <p>Bytes of a sound.</p>  
@@ -119,7 +114,7 @@ You can also get a minified file from JSDelivr's CDN:
 
 <a name="CyberusKeyAPI+getAuthenticationEndpointUrl"></a>
 
-### cyberusKeyAPI.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, [state], [nonce], [responseType]) ⇒
+### cyberusKeyAPI.getAuthenticationEndpointUrl(sessionId, scope, clientId, redirectUri, [state], [nonce], [responseType]) ⇒
 <p>Gets OpenID's Authentication endpoint URL which will be used to process the authentication.</p>
 
 **Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
@@ -131,7 +126,7 @@ You can also get a minified file from JSDelivr's CDN:
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| session | [<code>Session</code>](#Session) |  | <p>Cyberus Key session.</p> |
+| sessionId |  |  | <p>unique id created for the specific login and connected to the specific otp</p> |
 | scope | [<code>OpenIdScopeParser</code>](#OpenIdScopeParser) |  | <p>Each scope returns a set of user attributes, which are called claims. Once the user authorizes the requested scopes, the claims are returned in an ID Token.</p> |
 | clientId | <code>string</code> |  | <p>Public client ID generated during creating the account.</p> |
 | redirectUri | <code>string</code> |  | <p>Redirect URI to which the response will be sent. If the value is not whitelisted then the request will fail.</p> |
@@ -139,29 +134,10 @@ You can also get a minified file from JSDelivr's CDN:
 | [nonce] | <code>string</code> |  | <p>String value used to associate a Client session with an ID Token, and to mitigate replay attacks. The value is passed through unmodified from the Authentication Request to the ID Token. Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.</p> |
 | [responseType] | <code>string</code> | <code>&quot;&#x27;code&#x27;&quot;</code> | <p>OpenId response type. The default is <code>code</code> (Code Flow, involving the front-channel and backchannel).</p> |
 
-<a name="CyberusKeyAPI+authenticate"></a>
+<a name="CyberusKeyAPI+navigateAuthentication"></a>
 
-### cyberusKeyAPI.authenticate(clientId, redirectUri, scope, soundEmitter, navigator, [origin], [state], [nonce], [responseType]) ⇒ <code>Promise.&lt;void&gt;</code>
-<p>Makes an authentication with Cyberus Key.</p>
-
-**Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| clientId | <code>string</code> |  | <p>Public client ID generated during creating the account.</p> |
-| redirectUri | <code>string</code> |  | <p>Redirect URI to which the response will be sent. If the value is not whitelisted then the request will fail.</p> |
-| scope | [<code>OpenIdScopeParser</code>](#OpenIdScopeParser) |  | <p>Each scope returns a set of user attributes, which are called claims. Once the user authorizes the requested scopes, the claims are returned in an ID Token.</p> |
-| soundEmitter | <code>SoundEmitter</code> |  | <p>Interface which can play a sound.</p> |
-| navigator | <code>Navigator</code> |  | <p>Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.</p> |
-| [origin] | <code>string</code> |  | <p>The origin domain of the request being made. If <code>null</code> then the Referer header will be used.</p> |
-| [state] | <code>string</code> |  | <p>RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie. The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response. It’s that unique and non-guessable value that allows you to prevent the attack by confirming if the value coming from the response matches the one you expect (the one you generated when initiating the request). The state parameter is a string so you can encode any other information in it.</p> |
-| [nonce] | <code>string</code> |  | <p>String value used to associate a Client session with an ID Token, and to mitigate replay attacks. The value is passed through unmodified from the Authentication Request to the ID Token. Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.</p> |
-| [responseType] | <code>string</code> | <code>&quot;&#x27;code&#x27;&quot;</code> | <p>OpenId response type. The default is <code>code</code> (Code Flow, involving the front-channel and backchannel).</p> |
-
-<a name="CyberusKeyAPI+navigateAndGetTheSound"></a>
-
-### cyberusKeyAPI.navigateAndGetTheSound(clientId, redirectUri, scope, navigator, [origin], [state], [nonce], [responseType]) ⇒ <code>Promise.&lt;void&gt;</code>
-<p>Navigates to Authentication Endpoint and returns a sound. You have to emit it.</p>
+### cyberusKeyAPI.navigateAuthentication(clientId, redirectUri, scope, navigator, session, [origin], [state], [nonce], [responseType]) ⇒ <code>Promise.&lt;void&gt;</code>
+<p>Navigates to Authentication Endpoint</p>
 
 **Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
 
@@ -171,6 +147,7 @@ You can also get a minified file from JSDelivr's CDN:
 | redirectUri | <code>string</code> |  | <p>Redirect URI to which the response will be sent. If the value is not whitelisted then the request will fail.</p> |
 | scope | [<code>OpenIdScopeParser</code>](#OpenIdScopeParser) |  | <p>Each scope returns a set of user attributes, which are called claims. Once the user authorizes the requested scopes, the claims are returned in an ID Token.</p> |
 | navigator | <code>Navigator</code> |  | <p>Class describes an action that will be done to Authentication URL. For browsers it will be a page redirection.</p> |
+| session |  |  | <p>Session id</p> |
 | [origin] | <code>string</code> |  | <p>The origin domain of the request being made. If <code>null</code> then the Referer header will be used.</p> |
 | [state] | <code>string</code> |  | <p>RECOMMENDED. Opaque value used to maintain state between the request and the callback. Typically, CSRF, XSRF mitigation is done by cryptographically binding the value of this parameter with a browser cookie. The state parameter preserves some state object set by the client in the Authentication request and makes it available to the client in the response. It’s that unique and non-guessable value that allows you to prevent the attack by confirming if the value coming from the response matches the one you expect (the one you generated when initiating the request). The state parameter is a string so you can encode any other information in it.</p> |
 | [nonce] | <code>string</code> |  | <p>String value used to associate a Client session with an ID Token, and to mitigate replay attacks. The value is passed through unmodified from the Authentication Request to the ID Token. Sufficient entropy MUST be present in the nonce values used to prevent attackers from guessing values.</p> |
@@ -305,57 +282,6 @@ const scope = scopeParser.addEmail().addProfile().getValue();
 
 #### new Session()
 <p>A UTC date representing a date (and time) when a session has been created.</p>
-
-<a name="PromiseWebAudioSoundEmitter"></a>
-
-## PromiseWebAudioSoundEmitter
-**Kind**: global class  
-**Implements**: <code>SoundEmitter</code>  
-<a name="new_PromiseWebAudioSoundEmitter_new"></a>
-
-### new PromiseWebAudioSoundEmitter()
-<p>Class uses a HTML5's AudioContext interface to play a sound.
-It has known issues with Safari. If you want to support Safari, then use <code>webAudioSoundEmitter</code>.</p>
-
-<a name="WebAudioSoundEmitter"></a>
-
-## WebAudioSoundEmitter
-**Kind**: global class  
-**Implements**: <code>SoundEmitter</code>  
-
-* [WebAudioSoundEmitter](#WebAudioSoundEmitter)
-    * [new WebAudioSoundEmitter()](#new_WebAudioSoundEmitter_new)
-    * _instance_
-        * [.emit(sound)](#WebAudioSoundEmitter+emit) ⇒ <code>Promise.&lt;void&gt;</code>
-    * _static_
-        * [.PromiseWebAudioSoundEmitter#emit(sound)](#WebAudioSoundEmitter.PromiseWebAudioSoundEmitter+emit) ⇒ <code>Promise.&lt;void&gt;</code>
-
-<a name="new_WebAudioSoundEmitter_new"></a>
-
-### new WebAudioSoundEmitter()
-<p>Class uses a HTML5's AudioContext interface to play a sound.</p>
-
-<a name="WebAudioSoundEmitter+emit"></a>
-
-### webAudioSoundEmitter.emit(sound) ⇒ <code>Promise.&lt;void&gt;</code>
-<p>Emits a sound through HTML5's AudioContext interface.</p>
-
-**Kind**: instance method of [<code>WebAudioSoundEmitter</code>](#WebAudioSoundEmitter)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| sound | <code>ArrayBuffer</code> | <p>A binary record of the sound you want to play.</p> |
-
-<a name="WebAudioSoundEmitter.PromiseWebAudioSoundEmitter+emit"></a>
-
-### WebAudioSoundEmitter.PromiseWebAudioSoundEmitter#emit(sound) ⇒ <code>Promise.&lt;void&gt;</code>
-<p>Emits a sound through HTML5's AudioContext interface.</p>
-
-**Kind**: static method of [<code>WebAudioSoundEmitter</code>](#WebAudioSoundEmitter)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| sound | <code>ArrayBuffer</code> | <p>A binary record of the sound you want to play.</p> |
 
 <a name="Geolocation"></a>
 

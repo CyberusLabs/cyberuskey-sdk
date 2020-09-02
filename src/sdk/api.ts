@@ -42,7 +42,7 @@ export class CyberusKeyAPI {
    * @returns {Promise<Session>} The Cyberus Key session.
    * @memberof CyberusKeyAPI
    */
-  public async createSession(clientId: string, geo?: Geolocation, origin?: string): Promise<Session> {
+  public async createSession(clientId: string, origin?: string,geo?: Geolocation, ): Promise<Session> {
     const data = { client_id: clientId };
 
     if (geo) {

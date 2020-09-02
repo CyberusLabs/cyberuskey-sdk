@@ -66,7 +66,7 @@ You can also get a minified file from JSDelivr's CDN:
     * [new CyberusKeyAPI()](#new_CyberusKeyAPI_new)
     * _instance_
         * [.createSession(clientId, [geo], [origin])](#CyberusKeyAPI+createSession) ⇒ [<code>Promise.&lt;Session&gt;</code>](#Session)
-        * [.getOTPSound(session)](#CyberusKeyAPI+getOTPSound) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
+        * [.getOTPSound(session)](#CyberusKeyAPI+getOTPSound) ⇒ <code>Promise.&lt;string&gt;</code>
         * [.getAuthenticationEndpointUrl(sessionId, scope, clientId, redirectUri, [state], [nonce], [responseType])](#CyberusKeyAPI+getAuthenticationEndpointUrl) ⇒
         * [.navigateAuthentication(clientId, redirectUri, scope, navigator, session, [origin], [state], [nonce], [responseType])](#CyberusKeyAPI+navigateAuthentication) ⇒ <code>Promise.&lt;void&gt;</code>
     * _static_
@@ -98,11 +98,11 @@ You can also get a minified file from JSDelivr's CDN:
 
 <a name="CyberusKeyAPI+getOTPSound"></a>
 
-### cyberusKeyAPI.getOTPSound(session) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
-<p>Gets a sonic sound with embedded OTP. You have to emit it.</p>
+### cyberusKeyAPI.getOTPSound(session) ⇒ <code>Promise.&lt;string&gt;</code>
+<p>Gets a URL with sound with embedded OTP. You have to emit it.</p>
 
 **Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
-**Returns**: <code>Promise.&lt;ArrayBuffer&gt;</code> - <p>Bytes of a sound.</p>  
+**Returns**: <code>Promise.&lt;string&gt;</code> - <p>string with url to the sound.</p>  
 **Throws**:
 
 - <p>ResourceNotFoundError</p>

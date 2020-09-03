@@ -65,7 +65,7 @@ You can also get a minified file from JSDelivr's CDN:
 * [CyberusKeyAPI](#CyberusKeyAPI)
     * [new CyberusKeyAPI()](#new_CyberusKeyAPI_new)
     * _instance_
-        * [.createSession(clientId, [geo], [origin])](#CyberusKeyAPI+createSession) ⇒ [<code>Promise.&lt;Session&gt;</code>](#Session)
+        * [.createSession(clientId, [geo], [origin])](#CyberusKeyAPI+createSession) ⇒ <code>Promise.&lt;string&gt;</code>
         * [.getOTPSound(session)](#CyberusKeyAPI+getOTPSound) ⇒ <code>Promise.&lt;string&gt;</code>
         * [.getAuthenticationEndpointUrl(sessionId, scope, clientId, redirectUri, [state], [nonce], [responseType])](#CyberusKeyAPI+getAuthenticationEndpointUrl) ⇒
         * [.navigateAuthentication(clientId, redirectUri, scope, navigator, session, [origin], [state], [nonce], [responseType])](#CyberusKeyAPI+navigateAuthentication) ⇒ <code>Promise.&lt;void&gt;</code>
@@ -80,11 +80,11 @@ You can also get a minified file from JSDelivr's CDN:
 
 <a name="CyberusKeyAPI+createSession"></a>
 
-### cyberusKeyAPI.createSession(clientId, [geo], [origin]) ⇒ [<code>Promise.&lt;Session&gt;</code>](#Session)
+### cyberusKeyAPI.createSession(clientId, [geo], [origin]) ⇒ <code>Promise.&lt;string&gt;</code>
 <p>Creates the Cyberus Key session.</p>
 
 **Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
-**Returns**: [<code>Promise.&lt;Session&gt;</code>](#Session) - <p>The Cyberus Key session.</p>  
+**Returns**: <code>Promise.&lt;string&gt;</code> - <p>The Cyberus Key session id.</p>  
 **Throws**:
 
 - <p>WrongJsonError, OpenApiError, ResourceNotFoundError, OTPGenerationError, UnknownError</p>

@@ -18,7 +18,7 @@ exports.CyberusKeyAPI = void 0;
 class CyberusKeyAPI {
     /**
      *Creates an instance of CyberusKeyAPI.
-     * @param {string} hostUrl Base URL of the host server, e.g. `https://production-api.cyberuskey.com`
+     * @param {string} hostUrl Base URL of the host server, e.g. `https://api.cyberuskey.com`
      * @param {GeoProvider} [geoProvider] Geolocalization provider. Use specific implementation like `HTML5GeoProvider`.
      * @param {number} [delayMs=600] Delay (ms) between making an Authentication request and a sound playing.
      * @memberof CyberusKeyAPI
@@ -64,6 +64,27 @@ class CyberusKeyAPI {
             return fetch(this._getUrl('sessions'), params)
                 .then((response) => response.json())
                 .then((json) => json.data.session_id);
+        });
+    }
+    /**
+     * Checks if authentication server is available
+     *
+     * @returns {Promise<boolean>} flag indicating if the authentication server is available.
+     * @memberof CyberusKeyAPI
+     */
+    isOutOfService() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const requestOptions = {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            };
+            return fetch(this._getUrl(`version`), requestOptions)
+                .then(response => response.json())
+                .then((versionJson) => versionJson.outOfService)
+                .catch((err) => {
+                return err;
+            });
         });
     }
     /**

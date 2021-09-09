@@ -12,63 +12,97 @@ import {LoginOptions} from './loginOptions';
  * @class CyberusKeyAPI
  */
 export class CyberusKeyAPI {
-  private _apiUrl: URL;
-  private _geoProvider: GeoProvider;
-  private _cachedGeo: Geolocation;
-  private _delayMs: number;
+    private _apiUrl: URL;
+    private _geoProvider: GeoProvider;
+    private _cachedGeo: Geolocation;
+    private _delayMs: number;
 
-  /**
-   *Creates an instance of CyberusKeyAPI.
-   * @param {string} hostUrl Base URL of the host server, e.g. `https://production-api.cyberuskey.com`
-   * @param {GeoProvider} [geoProvider] Geolocalization provider. Use specific implementation like `HTML5GeoProvider`.
-   * @param {number} [delayMs=600] Delay (ms) between making an Authentication request and a sound playing.
-   * @memberof CyberusKeyAPI
-   */
-  constructor(hostUrl: string, geoProvider?: GeoProvider, delayMs: number = 600) {
-    this._apiUrl = new URL('/api/v2/', hostUrl);
-    this._geoProvider = geoProvider;
-    this._delayMs = delayMs;
-  }
-
-  /**
-   * Creates the Cyberus Key session.
-   *
-   * @param {string} clientId Public client ID generated during creating the account.
-   * @param {Geolocation} [geo] Give a value if you want to pass optional geolocation measurement.
-   *    It can be later use to compare it against the mobile's measurement (if you have set `fail_on_geo_mismatch`).
-   *    Those measurements can be used also to general improvement of the security.
-   * @param {string} [origin] The origin domain of the request being made. If `null` then the Referer header will be used.
-   * @throws WrongJsonError, OpenApiError, ResourceNotFoundError, OTPGenerationError, UnknownError
-   * @returns {Promise<string>} The Cyberus Key session id.
-   * @memberof CyberusKeyAPI
-   */
-  public async createSession(clientId: string, origin?: string,geo?: Geolocation): Promise<string> {
-    const data = { client_id: clientId };
-
-    if (geo) {
-        data['lat'] = geo.latitude;
-        data['lng'] = geo.longitude;
-    } else if (this._cachedGeo) {
-        data['lat'] = this._cachedGeo.latitude;
-        data['lng'] = this._cachedGeo.longitude;
+    /**
+     *Creates an instance of CyberusKeyAPI.
+     * @param {string} hostUrl Base URL of the host server, e.g. `https://api.cyberuskey.com`
+     * @param {GeoProvider} [geoProvider] Geolocalization provider. Use specific implementation like `HTML5GeoProvider`.
+     * @param {number} [delayMs=600] Delay (ms) between making an Authentication request and a sound playing.
+     * @memberof CyberusKeyAPI
+     */
+    constructor(hostUrl: string, geoProvider?: GeoProvider, delayMs: number = 600) {
+        this._apiUrl = new URL('/api/v2/', hostUrl);
+        this._geoProvider = geoProvider;
+        this._delayMs = delayMs;
     }
 
-    if (origin) {
-      data['origin'] = origin;
-    }
+    /**
+     * Creates the Cyberus Key session.
+     *
+     * @param {string} clientId Public client ID generated during creating the account.
+     * @param {Geolocation} [geo] Give a value if you want to pass optional geolocation measurement.
+     *    It can be later use to compare it against the mobile's measurement (if you have set `fail_on_geo_mismatch`).
+     *    Those measurements can be used also to general improvement of the security.
+     * @param {string} [origin] The origin domain of the request being made. If `null` then the Referer header will be used.
+     * @throws WrongJsonError, OpenApiError, ResourceNotFoundError, OTPGenerationError, UnknownError
+     * @returns {Promise<string>} The Cyberus Key session id.
+     * @memberof CyberusKeyAPI
+     */
+    public async createSession(clientId: string, origin?: string, geo?: Geolocation): Promise<string> {
 
-    const params = {
-        method: 'POST',
-        body: this._getUrlEncodedBody(data),
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+        const data = {client_id: clientId};
+
+        if (geo) {
+            data['lat'] = geo.latitude;
+            data['lng'] = geo.longitude;
+        } else if (this._cachedGeo) {
+            data['lat'] = this._cachedGeo.latitude;
+            data['lng'] = this._cachedGeo.longitude;
         }
+
+        if (origin) {
+            data['origin'] = origin;
+        }
+
+        const params = {
+            method: 'POST',
+            body: this._getUrlEncodedBody(data),
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }
+
+        return fetch(this._getUrl('sessions'), params)
+            .then((response) => response.json())
+            .then((json) => json.data.session_id);
     }
 
-    return fetch(this._getUrl('sessions'), params)
-        .then((response) => response.json())
-        .then((json) => json.data.session_id);
+    /**
+     * Checks if authentication server is available
+     *
+     * @returns {Promise<boolean>} flag indicating if the authentication server is available.
+     * @memberof CyberusKeyAPI
+     */
+
+
+    public async isOutOfService(): Promise<boolean> {
+
+        interface VersionResponse {
+            version: string;
+            minMobileVersion: string;
+            maxMobileVersion: string;
+            outOfService: boolean;
+        }
+
+        const requestOptions = {
+            headers: {
+                'Accept': 'application/json'
+            }
+        };
+
+        return fetch(this._getUrl(`version`), requestOptions)
+            .then(response => response.json())
+            .then((versionJson: VersionResponse) => versionJson.outOfService)
+            .catch((err) => {
+                return err;
+            });
+
     }
+
 
     /**
      * Gets a URL with sound with embedded OTP. You have to emit it.
@@ -96,6 +130,7 @@ export class CyberusKeyAPI {
             .catch((err) => {
                 return err;
             });
+
     }
 
 
@@ -202,27 +237,27 @@ export class CyberusKeyAPI {
             url.searchParams.append(parameterName, data[parameterName]);
         });
 
-    await options.navigator.navigate(url.href);
+        await options.navigator.navigate(url.href);
     }
 
-  private _getUrl(path: string): string {
-    return (new URL(path, this._apiUrl)).href;
-  }
+    private _getUrl(path: string): string {
+        return (new URL(path, this._apiUrl)).href;
+    }
 
-  private _getUrlEncodedBody(data: any): string {
-    return Object.keys(data).reduce<string[]>((result: string[], key: string) => {
-      const encodedKey = encodeURIComponent(key);
-      const encodedValue = encodeURIComponent(data[key]);
+    private _getUrlEncodedBody(data: any): string {
+        return Object.keys(data).reduce<string[]>((result: string[], key: string) => {
+            const encodedKey = encodeURIComponent(key);
+            const encodedValue = encodeURIComponent(data[key]);
 
-      result.push(`${encodedKey}=${encodedValue}`);
+            result.push(`${encodedKey}=${encodedValue}`);
 
-      return result;
-    }, []).join("&")
-  }
+            return result;
+        }, []).join("&")
+    }
 
-  private _timeout(ms: number): Promise<number> {
-    return new Promise((resolve) => {
-      return setTimeout(resolve, ms);
-    });
-  }
+    private _timeout(ms: number): Promise<number> {
+        return new Promise((resolve) => {
+            return setTimeout(resolve, ms);
+        });
+    }
 }

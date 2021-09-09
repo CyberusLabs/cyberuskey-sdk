@@ -66,6 +66,7 @@ You can also get a minified file from JSDelivr's CDN:
     * [new CyberusKeyAPI()](#new_CyberusKeyAPI_new)
     * _instance_
         * [.createSession(clientId, [geo], [origin])](#CyberusKeyAPI+createSession) ⇒ <code>Promise.&lt;string&gt;</code>
+        * [.isOutOfService()](#CyberusKeyAPI+isOutOfService) ⇒ <code>Promise.&lt;boolean&gt;</code>
         * [.getOTPSound(session)](#CyberusKeyAPI+getOTPSound) ⇒ <code>Promise.&lt;string&gt;</code>
         * [.getAuthenticationEndpointUrl(sessionId, scope, clientId, redirectUri, [state], [nonce], [responseType])](#CyberusKeyAPI+getAuthenticationEndpointUrl) ⇒
         * [.navigateAuthentication(clientId, redirectUri, scope, navigator, session, [origin], [state], [nonce], [responseType])](#CyberusKeyAPI+navigateAuthentication) ⇒ <code>Promise.&lt;void&gt;</code>
@@ -96,6 +97,13 @@ You can also get a minified file from JSDelivr's CDN:
 | [geo] | [<code>Geolocation</code>](#Geolocation) | <p>Give a value if you want to pass optional geolocation measurement. It can be later use to compare it against the mobile's measurement (if you have set <code>fail_on_geo_mismatch</code>). Those measurements can be used also to general improvement of the security.</p> |
 | [origin] | <code>string</code> | <p>The origin domain of the request being made. If <code>null</code> then the Referer header will be used.</p> |
 
+<a name="CyberusKeyAPI+isOutOfService"></a>
+
+### cyberusKeyAPI.isOutOfService() ⇒ <code>Promise.&lt;boolean&gt;</code>
+<p>Checks if authentication server is available</p>
+
+**Kind**: instance method of [<code>CyberusKeyAPI</code>](#CyberusKeyAPI)  
+**Returns**: <code>Promise.&lt;boolean&gt;</code> - <p>flag indicating if the authentication server is available.</p>  
 <a name="CyberusKeyAPI+getOTPSound"></a>
 
 ### cyberusKeyAPI.getOTPSound(session) ⇒ <code>Promise.&lt;string&gt;</code>
@@ -165,7 +173,7 @@ You can also get a minified file from JSDelivr's CDN:
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| hostUrl | <code>string</code> |  | <p>Base URL of the host server, e.g. <code>https://production-api.cyberuskey.com</code></p> |
+| hostUrl | <code>string</code> |  | <p>Base URL of the host server, e.g. <code>https://api.cyberuskey.com</code></p> |
 | [geoProvider] | <code>GeoProvider</code> |  | <p>Geolocalization provider. Use specific implementation like <code>HTML5GeoProvider</code>.</p> |
 | [delayMs] | <code>number</code> | <code>600</code> | <p>Delay (ms) between making an Authentication request and a sound playing.</p> |
 

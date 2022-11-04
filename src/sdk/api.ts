@@ -14,7 +14,6 @@ import {LoginOptions} from './loginOptions';
 export class CyberusKeyAPI {
     private _apiUrl: URL;
     private _geoProvider: GeoProvider;
-    private _cachedGeo: Geolocation;
     private _delayMs: number;
 
     /**
@@ -49,9 +48,12 @@ export class CyberusKeyAPI {
         if (geo) {
             data['lat'] = geo.latitude;
             data['lng'] = geo.longitude;
-        } else if (this._cachedGeo) {
-            data['lat'] = this._cachedGeo.latitude;
-            data['lng'] = this._cachedGeo.longitude;
+        } else if(this._geoProvider){
+            const gps = await this._geoProvider.getGeo();
+            if (gps){
+                data['lat'] = gps.latitude;
+                data['lng'] = gps.longitude;
+            }
         }
 
         if (origin) {
@@ -64,7 +66,7 @@ export class CyberusKeyAPI {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
-        }
+        };
 
         return fetch(this._getUrl('sessions'), params)
             .then((response) => response.json())
@@ -115,7 +117,7 @@ export class CyberusKeyAPI {
 
 
     public getOTPSound(session: string): Promise<string> {
-        const type = 'audio/mpeg'
+        const type = 'audio/mpeg';
         const requestOptions = {
             headers: {
                 'Accept': type,

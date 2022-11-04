@@ -49,8 +49,6 @@ export class HTML5GeoProvider implements GeoProvider {
 
   _getGeo(enableHighAccuracy: boolean): Promise<Position> {
     return new Promise((resolve, reject) => {
-      console.log(`enableHighAccuracy: ${enableHighAccuracy}`);
-
       this._navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy })
     });
   }

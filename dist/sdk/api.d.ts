@@ -11,7 +11,6 @@ import { LoginOptions } from './loginOptions';
 export declare class CyberusKeyAPI {
     private _apiUrl;
     private _geoProvider;
-    private _cachedGeo;
     private _delayMs;
     /**
      *Creates an instance of CyberusKeyAPI.

@@ -340,7 +340,7 @@ const scope = scopeParser.addEmail().addProfile().getValue();
         * [.getGeo()](#HTML5GeoProvider+getGeo) ⇒ [<code>Promise.&lt;Geolocation&gt;</code>](#Geolocation)
     * _static_
         * [.HTML5GeoProvider](#HTML5GeoProvider.HTML5GeoProvider)
-            * [new HTML5GeoProvider([enableHighAccuracy], [navigator])](#new_HTML5GeoProvider.HTML5GeoProvider_new)
+            * [new HTML5GeoProvider([enableHighAccuracy], [navigator], numOfTriesBeforeGpsActivates, onPermissionDialog)](#new_HTML5GeoProvider.HTML5GeoProvider_new)
 
 <a name="new_HTML5GeoProvider_new"></a>
 
@@ -361,7 +361,7 @@ It uses a HTML5's <code>Geolocation.getCurrentPosition()</code> method.</p>
 **Kind**: static class of [<code>HTML5GeoProvider</code>](#HTML5GeoProvider)  
 <a name="new_HTML5GeoProvider.HTML5GeoProvider_new"></a>
 
-#### new HTML5GeoProvider([enableHighAccuracy], [navigator])
+#### new HTML5GeoProvider([enableHighAccuracy], [navigator], numOfTriesBeforeGpsActivates, onPermissionDialog)
 <p>Creates an instance of HTML5GeoProvider.</p>
 
 
@@ -369,6 +369,8 @@ It uses a HTML5's <code>Geolocation.getCurrentPosition()</code> method.</p>
 | --- | --- | --- | --- |
 | [enableHighAccuracy] | <code>boolean</code> | <code>false</code> | <p>Forces high accuracy of the geolocation. It may take longer.</p> |
 | [navigator] | <code>Navigator</code> | <code>window.navigator</code> |  |
+| numOfTriesBeforeGpsActivates |  |  | <p>The GPS localization will be used only after n unsuccessful tries. By unsuccessful try we define the number of times the authentication resulted in session not found error.</p> |
+| onPermissionDialog |  |  | <p>Leave an implementation of the additional information dialog to appear before site asks for localization permission for the caller to handle. It takes a function with default message as parameter</p> |
 
 <a name="RedirectNavigator"></a>
 

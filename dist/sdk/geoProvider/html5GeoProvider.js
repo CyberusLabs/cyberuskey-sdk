@@ -25,11 +25,20 @@ class HTML5GeoProvider {
      *
      * @param {boolean} [enableHighAccuracy=false]  Forces high accuracy of the geolocation. It may take longer.
      * @param {Navigator} [navigator=window.navigator]
+     * @param numOfTriesBeforeGpsActivates The GPS localization will be used only after n unsuccessful tries.
+     * By unsuccessful try we define the number of times the authentication resulted in session not found error.
+     * @param onPermissionDialog Leave an implementation of the additional information dialog to appear before site
+     * asks for localization permission for the caller to handle. It takes a function with default message as parameter
      * @memberof HTML5GeoProvider
      */
-    constructor(enableHighAccuracy = false, navigator = window.navigator) {
+    constructor(enableHighAccuracy = false, onPermissionDialog = null, numOfTriesBeforeGpsActivates = 2, navigator = window.navigator) {
+        this._numOfTriesBeforeGpsActivates = 2;
+        this.defaultMessage = "Cyberus Key widget would like to access your location" +
+            " to use geolocation tracking to assert successful authentication.";
         this._enableHighAccuracy = enableHighAccuracy;
         this._navigator = navigator;
+        this._numOfTriesBeforeGpsActivates = numOfTriesBeforeGpsActivates;
+        this._onPermissionDialog = onPermissionDialog;
     }
     /**
      * Gets a geolocalization measurement.
@@ -40,7 +49,24 @@ class HTML5GeoProvider {
     getGeo() {
         return __awaiter(this, void 0, void 0, function* () {
             let result = null;
+            let data = sessionStorage.getItem("auth_counter");
+            if (data == null)
+                return null;
+            let value = parseInt(data, 10);
+            if (isNaN(value) || value < this._numOfTriesBeforeGpsActivates)
+                return null;
             try {
+                const permissionDialog = this._onPermissionDialog;
+                const defaultMessage = this.defaultMessage;
+                navigator.permissions && navigator.permissions.query({ name: 'geolocation' })
+                    .then(function (PermissionStatus) {
+                    if (PermissionStatus.state == 'prompt') {
+                        if (permissionDialog)
+                            permissionDialog(defaultMessage);
+                        else
+                            alert(defaultMessage);
+                    }
+                });
                 result = yield this._getGeo(this._enableHighAccuracy);
             }
             catch (_a) {

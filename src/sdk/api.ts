@@ -83,6 +83,29 @@ export class CyberusKeyAPI {
 
     public async isOutOfService(): Promise<boolean> {
 
+
+        let errPageMsg = (new URL(document.location.href)).searchParams.get("error");
+
+        if (errPageMsg !=null && errPageMsg == "otp_timeout_error"){
+            let authActive = sessionStorage.getItem("auth_active");
+            if (authActive !=null && authActive === "true"){
+                sessionStorage.removeItem("auth_active");
+                let authCounter = sessionStorage.getItem("auth_counter");
+                if (authCounter!=null){
+                    let authCounterValue = parseInt(authCounter, 10)
+                    if (!isNaN(authCounterValue)){
+                        sessionStorage.setItem("auth_counter", (authCounterValue + 1).toString());
+                    }
+                }else{
+                    sessionStorage.setItem("auth_counter", "1");
+                }
+            }
+        }
+        else{
+            sessionStorage.removeItem("auth_counter");
+        }
+
+
         interface VersionResponse {
             version: string;
             minMobileVersion: string;
@@ -209,6 +232,7 @@ export class CyberusKeyAPI {
      */
     public navigateAuthentication(clientId: string, redirectUri: string, scope: OpenIdScopeParser, navigator: Navigator, session: string, origin?: string, state?: string, nonce?: string, responseType = 'code') {
         const authenticateUrl = this.getAuthenticationEndpointUrl(session, scope, clientId, redirectUri, state, nonce, responseType);
+        sessionStorage.setItem("auth_active", "true");
         return navigator.navigate(authenticateUrl);
     }
 

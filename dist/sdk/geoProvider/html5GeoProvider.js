@@ -48,38 +48,42 @@ class HTML5GeoProvider {
      */
     getGeo() {
         return __awaiter(this, void 0, void 0, function* () {
-            let result = null;
-            let data = sessionStorage.getItem("auth_counter");
-            if (data == null)
-                return null;
-            let value = parseInt(data, 10);
-            if (isNaN(value) || value < this._numOfTriesBeforeGpsActivates)
-                return null;
+            const permissionStatus = yield navigator.permissions.query({
+                name: 'geolocation'
+            });
             try {
-                const permissionDialog = this._onPermissionDialog;
-                const defaultMessage = this.defaultMessage;
-                navigator.permissions && navigator.permissions.query({ name: 'geolocation' })
-                    .then(function (PermissionStatus) {
-                    if (PermissionStatus.state == 'prompt') {
-                        if (permissionDialog)
-                            permissionDialog(defaultMessage);
-                        else
-                            alert(defaultMessage);
-                    }
-                });
-                result = yield this._getGeo(this._enableHighAccuracy);
+                if (permissionStatus.state == "granted")
+                    return yield this._getGeo(this._enableHighAccuracy);
+                if (permissionStatus.state == "denied")
+                    return null;
+                if (permissionStatus.state == "prompt") {
+                    if (!this._doIShowCustomPrompt())
+                        return null;
+                    if (this._onPermissionDialog)
+                        this._onPermissionDialog(this.defaultMessage);
+                    else
+                        alert(this.defaultMessage);
+                    return yield this._getGeo(this._enableHighAccuracy);
+                }
             }
-            catch (_a) {
-                // E.g. user didn't agree on geolicalization.
+            catch (e) {
                 return null;
             }
-            const { coords } = result;
-            return new geo_1.Geolocation(coords.latitude, coords.longitude, coords.accuracy);
         });
     }
+    _doIShowCustomPrompt() {
+        let data = sessionStorage.getItem("auth_counter");
+        if (data == null)
+            return false;
+        let value = parseInt(data, 10);
+        return !isNaN(value) && value >= this._numOfTriesBeforeGpsActivates;
+    }
     _getGeo(enableHighAccuracy) {
-        return new Promise((resolve, reject) => {
-            this._navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy });
+        return __awaiter(this, void 0, void 0, function* () {
+            const { coords } = yield new Promise((resolve, reject) => {
+                this._navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy });
+            });
+            return new geo_1.Geolocation(coords.latitude, coords.longitude, coords.accuracy);
         });
     }
 }

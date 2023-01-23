@@ -33,5 +33,6 @@ export declare class HTML5GeoProvider implements GeoProvider {
      * @memberof HTML5GeoProvider
      */
     getGeo(): Promise<Geolocation>;
-    _getGeo(enableHighAccuracy: boolean): Promise<Position>;
+    _doIShowCustomPrompt(): boolean;
+    _getGeo(enableHighAccuracy: boolean): Promise<Geolocation>;
 }

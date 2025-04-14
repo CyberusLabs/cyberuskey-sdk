@@ -15,6 +15,8 @@ export class CyberusKeyAPI {
     private _apiUrl: URL;
     private _geoProvider: GeoProvider;
     private _delayMs: number;
+    private backgroundAudioBuffer?: AudioBuffer;
+    private backgroundAudioPromise?: Promise<void>;
 
     /**
      *Creates an instance of CyberusKeyAPI.
@@ -83,7 +85,6 @@ export class CyberusKeyAPI {
 
     public async isOutOfService(): Promise<boolean> {
 
-
         let errPageMsg = (new URL(document.location.href)).searchParams.get("error");
 
         if (errPageMsg !=null && errPageMsg == "otp_timeout_error"){
@@ -105,6 +106,7 @@ export class CyberusKeyAPI {
             sessionStorage.removeItem("auth_counter");
         }
 
+        this.preloadBackgroundAudio()
 
         interface VersionResponse {
             version: string;
@@ -127,6 +129,22 @@ export class CyberusKeyAPI {
             });
 
     }
+
+
+
+    public preloadBackgroundAudio(): void {
+        if (!this.backgroundAudioPromise) {
+            this.backgroundAudioPromise = (async () => {
+                const url = 'https://staticaudio.azureedge.net/static/Piano_FSK_1a_long.wav';
+                const res = await fetch(url);
+                const buffer = await res.arrayBuffer();
+
+                const ctx = new AudioContext();
+                this.backgroundAudioBuffer = await ctx.decodeAudioData(buffer);
+            })();
+        }
+    }
+
 
 
     /**
@@ -157,6 +175,66 @@ export class CyberusKeyAPI {
             });
 
     }
+
+
+    public async getOTPSoundBackground(session: string): Promise<{ otpUrl: string; pianoUrl: string }> {
+        const otpUrl = this._getUrl(`sessions/${session}?otp_only=true`);
+        const audioContext = new AudioContext();
+
+        try {
+            if (this.backgroundAudioPromise) {
+                await this.backgroundAudioPromise;
+            }
+
+            if (!this.backgroundAudioBuffer) {
+                throw new Error('Background audio is not loaded.');
+            }
+
+            const otpResponse = await fetch(otpUrl);
+            const otpArrayBuffer = await otpResponse.arrayBuffer();
+            const otpBuffer = await audioContext.decodeAudioData(otpArrayBuffer);
+
+            const silenceDuration = 0.5;
+            const totalPlays = 10;
+            const otpDuration = otpBuffer.duration;
+            const totalDuration = totalPlays * (otpDuration + silenceDuration);
+
+            const otpSequence = audioContext.createBuffer(
+                otpBuffer.numberOfChannels,
+                totalDuration * audioContext.sampleRate,
+                audioContext.sampleRate
+            );
+
+            for (let i = 0; i < totalPlays; i++) {
+                const startSample = Math.floor(i * (otpDuration + silenceDuration) * audioContext.sampleRate);
+                for (let channel = 0; channel < otpBuffer.numberOfChannels; channel++) {
+                    const from = otpBuffer.getChannelData(channel);
+                    const to = otpSequence.getChannelData(channel);
+                    to.set(from, startSample);
+                }
+            }
+
+            // Create OTP blob
+            const otpWavBuffer = this._encodeWav(otpSequence, audioContext.sampleRate);
+            const otpBlob = new Blob([otpWavBuffer], { type: 'audio/wav' });
+            const otpBlobUrl = URL.createObjectURL(otpBlob);
+
+            // Create Piano blob
+            const pianoWavBuffer = this._encodeWav(this.backgroundAudioBuffer, audioContext.sampleRate);
+            const pianoBlob = new Blob([pianoWavBuffer], { type: 'audio/wav' });
+            const pianoBlobUrl = URL.createObjectURL(pianoBlob);
+
+            return {
+                otpUrl: otpBlobUrl,
+                pianoUrl: pianoBlobUrl
+            };
+
+        } catch (err) {
+            console.error('Audio processing failed:', err);
+            return Promise.resolve({ otpUrl: '', pianoUrl: '' });
+        }
+    }
+
 
 
     /**
@@ -286,4 +364,56 @@ export class CyberusKeyAPI {
             return setTimeout(resolve, ms);
         });
     }
+
+
+    private _encodeWav(buffer: AudioBuffer, sampleRate: number): ArrayBuffer {
+        const numChannels = buffer.numberOfChannels;
+        const length = buffer.length * numChannels * 2;
+        const output = new ArrayBuffer(44 + length);
+        const view = new DataView(output);
+
+        const writeString = (offset: number, str: string) => {
+            for (let i = 0; i < str.length; i++) {
+                view.setUint8(offset + i, str.charCodeAt(i));
+            }
+        };
+
+        const floatTo16BitPCM = (output: DataView, offset: number, input: Float32Array) => {
+            for (let i = 0; i < input.length; i++, offset += 2) {
+                const s = Math.max(-1, Math.min(1, input[i]));
+                output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            }
+        };
+
+        writeString(0, 'RIFF');
+        view.setUint32(4, 36 + length, true);
+        writeString(8, 'WAVE');
+        writeString(12, 'fmt ');
+        view.setUint32(16, 16, true); // PCM
+        view.setUint16(20, 1, true);  // PCM format
+        view.setUint16(22, numChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, sampleRate * numChannels * 2, true);
+        view.setUint16(32, numChannels * 2, true);
+        view.setUint16(34, 16, true); // bits per sample
+        writeString(36, 'data');
+        view.setUint32(40, length, true);
+
+        let offset = 44;
+        const channels = [];
+        for (let i = 0; i < numChannels; i++) {
+            channels.push(buffer.getChannelData(i));
+        }
+
+        for (let i = 0; i < buffer.length; i++) {
+            for (let channel = 0; channel < numChannels; channel++) {
+                floatTo16BitPCM(view, offset, new Float32Array([channels[channel][i]]));
+                offset += 2;
+            }
+        }
+
+        return output;
+    }
+
+
 }

@@ -12,6 +12,8 @@ export declare class CyberusKeyAPI {
     private _apiUrl;
     private _geoProvider;
     private _delayMs;
+    private backgroundAudioBuffer?;
+    private backgroundAudioPromise?;
     /**
      *Creates an instance of CyberusKeyAPI.
      * @param {string} hostUrl Base URL of the host server, e.g. `https://api.cyberuskey.com`
@@ -40,6 +42,7 @@ export declare class CyberusKeyAPI {
      * @memberof CyberusKeyAPI
      */
     isOutOfService(): Promise<boolean>;
+    preloadBackgroundAudio(): void;
     /**
      * Gets a URL with sound with embedded OTP. You have to emit it.
      *
@@ -49,6 +52,10 @@ export declare class CyberusKeyAPI {
      * @memberof CyberusKeyAPI
      */
     getOTPSound(session: string): Promise<string>;
+    getOTPSoundBackground(session: string): Promise<{
+        otpUrl: string;
+        pianoUrl: string;
+    }>;
     /**
      * Gets OpenID's Authentication endpoint URL which will be used to process the authentication.
      *
@@ -100,4 +107,5 @@ export declare class CyberusKeyAPI {
     private _getUrl;
     private _getUrlEncodedBody;
     private _timeout;
+    private _encodeWav;
 }
